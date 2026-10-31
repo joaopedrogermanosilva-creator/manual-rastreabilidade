@@ -15,3 +15,10 @@ app.include_router(router)
 def service_worker():
     return FileResponse("app/static/js/sw.js", media_type="application/javascript")
 
+
+@app.get("/manifest.json")
+def manifest():
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/manifest.json", media_type="application/json")
+
+
