@@ -1,63 +1,24 @@
 {% extends "base.html" %}
-
 {% block title %}Editar: {{ proc.titulo }}{% endblock %}
-
 {% block content %}
 <section class="hero">
-    <a href="/tarefa/{{ proc.id }}" class="back-link">&#8592; Voltar para a tarefa</a>
+    <a href="/tarefa/{{ proc.id }}" class="back-link"><i class="ph ph-arrow-left"></i> Voltar</a>
     <h1>Editar Procedimento<span class="accent">.</span></h1>
-    <p class="subtitle">{{ proc.titulo }}</p>
 </section>
-
 <form action="/tarefa/{{ proc.id }}/editar" method="POST" class="form-manual" enctype="multipart/form-data">
+    <div class="form-group"><label>Título</label><input type="text" name="titulo" required value="{{ proc.titulo }}"></div>
+    <div class="form-group"><label>Categoria</label><select name="categoria" required>{% for slug, cat in categorias.items() %}<option value="{{ slug }}" {% if slug == proc.categoria_slug %}selected{% endif %}>{{ cat.titulo }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Resumo Curto</label><input type="text" name="resumo" required value="{{ proc.resumo }}"></div>
+    <div class="form-group"><label>Objetivo</label><textarea name="objetivo" rows="3" required>{{ proc.objetivo }}</textarea></div>
+    <div class="form-group"><label>Como realizar</label><textarea name="como_realizar" rows="5" required>{{ proc.como_realizar | join('
+') }}</textarea></div>
+    <div class="form-group"><label>Pontos de atenção</label><textarea name="pontos_atencao" rows="3">{{ proc.pontos_atencao | join('
+') }}</textarea></div>
     <div class="form-group">
-        <label>T&#237;tulo do Procedimento</label>
-        <input type="text" name="titulo" required value="{{ proc.titulo }}">
-    </div>
-
-    <div class="form-group">
-        <label>Categoria</label>
-        <select name="categoria" required>
-            {% for slug, cat in categorias.items() %}
-            <option value="{{ slug }}" {% if slug == proc.categoria_slug %}selected{% endif %}>{{ cat.titulo }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Resumo Curto</label>
-        <input type="text" name="resumo" required value="{{ proc.resumo }}">
-    </div>
-
-    <div class="form-group">
-        <label>Objetivo da tarefa</label>
-        <textarea name="objetivo" rows="3" required>{{ proc.objetivo }}</textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Como realizar (um passo por linha)</label>
-        <textarea name="como_realizar" rows="5" required>{{ proc.como_realizar | join('
-') }}</textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Pontos de aten&#231;&#227;o (um por linha)</label>
-        <textarea name="pontos_atencao" rows="3">{{ proc.pontos_atencao | join('
-') }}</textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Arquivo de Exemplo (PDF ou Imagem)</label>
-        {% if proc.arquivo_url %}
-            <p style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">Arquivo atual: <a href="{{ proc.arquivo_url }}" target="_blank">Ver arquivo</a></p>
-        {% endif %}
+        <label>Anexar Imagem ou PDF</label>
+        {% if proc.arquivo_url %}<p style="font-size:12px;">Atual: <a href="{{ proc.arquivo_url }}" target="_blank">Ver arquivo</a></p>{% endif %}
         <input type="file" name="arquivo" accept=".pdf,image/*">
-        <p style="font-size:12px; color:var(--text-dim); margin-top:4px;">Deixe em branco para manter o arquivo atual.</p>
     </div>
-
-    <div class="form-actions">
-        <a href="/tarefa/{{ proc.id }}" class="btn-cancel">Cancelar</a>
-        <button type="submit" class="btn-primary">Salvar Altera&#231;&#245;es</button>
-    </div>
+    <div class="form-actions"><a href="/tarefa/{{ proc.id }}" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar</button></div>
 </form>
 {% endblock %}

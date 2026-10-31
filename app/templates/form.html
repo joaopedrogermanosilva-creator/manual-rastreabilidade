@@ -1,59 +1,18 @@
 {% extends "base.html" %}
-
-{% block title %}Novo Procedimento — Manual de Rastreabilidade{% endblock %}
-
+{% block title %}Novo Procedimento{% endblock %}
 {% block content %}
 <section class="hero">
-    <a href="/" class="back-link">← Voltar para o início</a>
+    <a href="/" class="back-link"><i class="ph ph-arrow-left"></i> Voltar</a>
     <h1>Novo Procedimento<span class="accent">.</span></h1>
-    <p class="subtitle">Preencha as informações para adicionar uma tarefa ao manual.</p>
 </section>
-
-<form action="/tarefa/novo" method="POST" enctype="multipart/form-data" class="form-manual">
-    <div class="form-group">
-        <label>Título do Procedimento</label>
-        <input type="text" name="titulo" required placeholder="Ex: Conferência de documentos ABCAR">
-    </div>
-
-    <div class="form-group">
-        <label>Categoria</label>
-        <select name="categoria" required>
-            <option value="">Selecione...</option>
-            {% for slug, cat in categorias.items() %}
-            <option value="{{ slug }}">{{ cat.titulo }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Resumo Curto (aparece nos cards)</label>
-        <input type="text" name="resumo" required placeholder="Ex: Consulta de documentos e orientações.">
-    </div>
-
-    <div class="form-group">
-        <label>Objetivo da tarefa</label>
-        <textarea name="objetivo" rows="3" required placeholder="Para que serve essa tarefa?"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Como realizar (um passo por linha)</label>
-        <textarea name="como_realizar" rows="5" required placeholder="1. Primeiro passo..."></textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Pontos de atenção (um por linha)</label>
-        <textarea name="pontos_atencao" rows="3" placeholder="O que devo ficar atento?"></textarea>
-    </div>
-
-    
-    <div class="form-group">
-        <label>Arquivo de Exemplo (PDF ou Imagem)</label>
-        <input type="file" name="arquivo" accept=".pdf,image/*">
-    </div>
-
-    <div class="form-actions">
-        <a href="/" class="btn-cancel">Cancelar</a>
-        <button type="submit" class="btn-primary">Salvar Procedimento</button>
-    </div>
+<form action="/tarefa/novo" method="POST" class="form-manual" enctype="multipart/form-data">
+    <div class="form-group"><label>Título</label><input type="text" name="titulo" required></div>
+    <div class="form-group"><label>Categoria</label><select name="categoria" required><option value="">Selecione...</option>{% for slug, cat in categorias.items() %}<option value="{{ slug }}">{{ cat.titulo }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Resumo Curto</label><input type="text" name="resumo" required></div>
+    <div class="form-group"><label>Objetivo</label><textarea name="objetivo" rows="3" required></textarea></div>
+    <div class="form-group"><label>Como realizar (um passo por linha)</label><textarea name="como_realizar" rows="5" required></textarea></div>
+    <div class="form-group"><label>Pontos de atenção (um por linha)</label><textarea name="pontos_atencao" rows="3"></textarea></div>
+    <div class="form-group"><label>Anexar Imagem ou PDF</label><input type="file" name="arquivo" accept=".pdf,image/*"></div>
+    <div class="form-actions"><a href="/" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar</button></div>
 </form>
 {% endblock %}
