@@ -59,7 +59,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
                     .then(reg => console.log('Service Worker OK'))
                     .catch(err => console.log('Service Worker Falhou', err));
             });
