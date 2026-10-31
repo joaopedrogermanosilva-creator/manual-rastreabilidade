@@ -53,12 +53,15 @@
     <script src="/static/js/theme.js"></script>
     <script src="/static/js/menu.js"></script>
 
+    
+
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/js/sw.js')
-                    .then(reg => console.log('Service Worker registrado!', reg))
-                    .catch(err => console.log('Erro no Service Worker', err));
+                navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
+                    .then(reg => console.log('Service Worker OK'))
+                    .catch(err => console.log('Service Worker Falhou', err));
             });
         }
     </script>
