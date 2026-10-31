@@ -15,6 +15,7 @@
             document.documentElement.setAttribute('data-theme', t);
         })();
     </script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
     <div id="overlay" class="overlay"></div>
@@ -24,9 +25,9 @@
             <button id="close-menu" class="close-btn">&times;</button>
         </div>
         <ul class="sidebar-list">
-            <li><a href="/">&#127968; Início</a></li>
+            <li><a href="/"><i class="ph ph-house"></i> Início</a></li>
             {% for slug, cat in categorias.items() %}
-            <li><a href="/categoria/{{ slug }}">&#128196; {{ cat.titulo }}</a></li>
+            <li><a href="/categoria/{{ slug }}"><i class="ph ph-folder-open"></i> {{ cat.titulo }}</a></li>
             {% endfor %}
         </ul>
         <div class="sidebar-footer">
@@ -37,12 +38,12 @@
     <header class="topbar">
         <div class="brand">
             <button id="menu-toggle" class="menu-btn">&#9776;</button>
-            <span class="brand-mark">&#9684;&#9682;</span>
+            <span class="brand-mark"><i class="ph ph-crosshair"></i></span>
             <span class="brand-name">RASTREABILIDADE</span>
             <a href="/buscar" class="top-search-btn">&#128269;</a>
         </div>
         <button id="theme-toggle" class="theme-btn" title="Alternar tema">
-            <span class="theme-icon">&#9680;</span>
+            <span class="theme-icon"><i class="ph ph-moon"></i></span>
         </button>
     </header>
 

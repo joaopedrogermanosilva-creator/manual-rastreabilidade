@@ -2,8 +2,8 @@
 {% block title %}Resultados da busca{% endblock %}
 {% block content %}
 <section class="hero">
-    <a href="/" class="back-link">&#8592; Voltar para o início</a>
-    <h1>Resultados para: "{{ termo }}"<span class="accent">.</span></h1>
+    <a href="/" class="back-link"><i class="ph ph-arrow-left"></i> Voltar para o início</a>
+    <h1>Resultados para: <span class="accent">"{{ termo }}"</span></h1>
     <p class="subtitle">{{ resultados|length }} procedimento(s) encontrado(s).</p>
 </section>
 
@@ -19,7 +19,11 @@
         {% endfor %}
     </div>
     {% else %}
-    <p class="aviso-fase">Nenhum resultado encontrado para "{{ termo }}".</p>
+    <div class="empty-state">
+        <i class="ph ph-magnifying-glass"></i>
+        <h3>Nenhum resultado encontrado</h3>
+        <p>Tente pesquisar por outro termo.</p>
+    </div>
     {% endif %}
 </section>
 {% endblock %}

@@ -1,37 +1,39 @@
 {% extends "base.html" %}
-
 {% block title %}{{ proc.titulo }} &mdash; Manual de Rastreabilidade{% endblock %}
 
 {% block content %}
 <section class="hero">
-    <a href="/categoria/{{ proc.categoria_slug }}" class="back-link">&#8592; Voltar para {{ categoria.titulo }}</a>
+    <a href="/categoria/{{ proc.categoria_slug }}" class="back-link"><i class="ph ph-arrow-left"></i> Voltar para {{ categoria.titulo }}</a>
     <h1>{{ proc.titulo }}<span class="accent">.</span></h1>
     <p class="subtitle">{{ proc.resumo }}</p>
 
     <div class="acoes-tarefa">
-        <a href="/tarefa/{{ proc.id }}/editar" class="btn-editar">&#9998; Editar</a>
+        <a href="/tarefa/{{ proc.id }}/editar" class="btn-editar"><i class="ph ph-pencil-simple"></i> Editar</a>
         <form action="/tarefa/{{ proc.id }}/excluir" method="POST" style="display:inline;" onsubmit="return confirm('Excluir este procedimento?');">
-            <button type="submit" class="btn-excluir">&#10006; Excluir</button>
+            <button type="submit" class="btn-excluir"><i class="ph ph-trash"></i> Excluir</button>
         </form>
     </div>
 </section>
 
 <section class="bloco">
-    <h2 class="section-title">1. Objetivo da tarefa</h2>
+    <h2 class="section-title"><i class="ph ph-target"></i> 1. Objetivo da tarefa</h2>
     <p>{{ proc.objetivo }}</p>
 </section>
 
 <section class="bloco">
-    <h2 class="section-title">2. Como realizar</h2>
-    <ol class="passos">
+    <h2 class="section-title"><i class="ph ph-list-checks"></i> 2. Como realizar</h2>
+    <div class="passos-grid">
         {% for passo in proc.como_realizar %}
-        <li>{{ passo }}</li>
+        <div class="passo-card">
+            <span class="passo-num">{{ loop.index }}</span>
+            <p>{{ passo }}</p>
+        </div>
         {% endfor %}
-    </ol>
+    </div>
 </section>
 
 <section class="bloco">
-    <h2 class="section-title">3. Pontos de atenção</h2>
+    <h2 class="section-title"><i class="ph ph-warning-circle"></i> 3. Pontos de atenção</h2>
     <ul class="atencao">
         {% for ponto in proc.pontos_atencao %}
         <li>{{ ponto }}</li>
@@ -40,19 +42,19 @@
 </section>
 
 <section class="bloco">
-    <h2 class="section-title">4. Exemplos de documentos</h2>
+    <h2 class="section-title"><i class="ph ph-paperclip"></i> 4. Exemplos de documentos</h2>
     {% if proc.arquivo_url %}
-        <div class="card exemplo" style="max-width: 400px;">
-            <span class="card-tag">Arquivo</span>
+        <div class="arquivo-card">
             {% if proc.arquivo_url.endswith('.pdf') %}
-                <h3>&#128196; PDF Anexado</h3>
-                <a href="{{ proc.arquivo_url }}" target="_blank" class="btn-primary" style="text-decoration:none; display:inline-block; margin-top:10px;">Abrir PDF</a>
+                <i class="ph ph-file-pdf" style="font-size: 48px; color: #dc2626;"></i>
+                <h3>Documento PDF</h3>
+                <a href="{{ proc.arquivo_url }}" target="_blank" class="btn-primary"><i class="ph ph-download-simple"></i> Abrir PDF</a>
             {% else %}
-                <img src="{{ proc.arquivo_url }}" alt="Exemplo" style="width:100%; border-radius:6px; margin-top:10px;">
+                <img src="{{ proc.arquivo_url }}" alt="Exemplo" style="width:100%; max-width: 500px; border-radius:8px; margin-bottom: 16px;">
             {% endif %}
         </div>
     {% else %}
-        <p class="aviso-fase">Nenhum arquivo anexado a este procedimento.</p>
+        <p class="aviso-fase"><i class="ph ph-info"></i> Nenhum arquivo anexado a este procedimento.</p>
     {% endif %}
 </section>
 {% endblock %}
