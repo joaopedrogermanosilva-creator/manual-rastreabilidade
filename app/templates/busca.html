@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Resultados da busca{% endblock %}
+{% block content %}
+<section class="hero">
+    <a href="/" class="back-link">&#8592; Voltar para o início</a>
+    <h1>Resultados para: "{{ termo }}"<span class="accent">.</span></h1>
+    <p class="subtitle">{{ resultados|length }} procedimento(s) encontrado(s).</p>
+</section>
+
+<section>
+    {% if resultados %}
+    <div class="grid">
+        {% for p in resultados %}
+        <a class="card" href="/tarefa/{{ p.id }}">
+            <span class="card-tag">{{ p.categoria_slug|capitalize }}</span>
+            <h3>{{ p.titulo }}</h3>
+            <p>{{ p.resumo }}</p>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="aviso-fase">Nenhum resultado encontrado para "{{ termo }}".</p>
+    {% endif %}
+</section>
+{% endblock %}

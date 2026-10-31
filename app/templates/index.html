@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Central de Consulta{% endblock %}
+{% block content %}
+<section class="landing-hero">
+    <div class="landing-content">
+        <h1>Central de Consulta<span class="accent">.</span></h1>
+        <p class="subtitle" style="font-size: 18px;">Tudo o que você precisa para a operação de recebimento, na palma da mão.</p>
+        
+        <form action="/buscar" method="GET" class="search-bar-wrapper">
+            <div class="search-bar">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" name="q" placeholder="Pesquisar procedimentos, documentos, escala..." autocomplete="off">
+                <button type="submit" class="btn-search">Buscar</button>
+            </div>
+        </form>
+        
+        <div class="quick-links">
+            <a href="/categoria/operacoes" class="quick-link">&#128196; Operações</a>
+            <a href="/categoria/documentos" class="quick-link">&#128196; Documentos</a>
+            <a href="/categoria/escala" class="quick-link">&#128196; Escala</a>
+            <a href="/categoria/rastreio" class="quick-link">&#128196; Rastreio</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

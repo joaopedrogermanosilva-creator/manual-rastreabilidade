@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Manual de Rastreabilidade{% endblock %}</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
+    <script>
+        (function () {
+            const t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+<body>
+    <div id="overlay" class="overlay"></div>
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2>Menu</h2>
+            <button id="close-menu" class="close-btn">&times;</button>
+        </div>
+        <ul class="sidebar-list">
+            <li><a href="/">&#127968; Início</a></li>
+            {% for slug, cat in categorias.items() %}
+            <li><a href="/categoria/{{ slug }}">&#128196; {{ cat.titulo }}</a></li>
+            {% endfor %}
+        </ul>
+        <div class="sidebar-footer">
+            <a href="/tarefa/novo" class="btn-primary" onclick="return confirm('Tem certeza que deseja adicionar um novo procedimento?');">+ Novo Procedimento</a>
+        </div>
+    </aside>
+
+    <header class="topbar">
+        <div class="brand">
+            <button id="menu-toggle" class="menu-btn">&#9776;</button>
+            <span class="brand-mark">&#9684;&#9682;</span>
+            <span class="brand-name">RASTREABILIDADE</span>
+            <a href="/buscar" class="top-search-btn">&#128269;</a>
+        </div>
+        <button id="theme-toggle" class="theme-btn" title="Alternar tema">
+            <span class="theme-icon">&#9680;</span>
+        </button>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/menu.js"></script>
+</body>
+</html>

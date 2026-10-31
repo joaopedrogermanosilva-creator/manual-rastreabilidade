@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ categoria.titulo }} — Manual de Rastreabilidade{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <a href="/" class="back-link">← Voltar</a>
+    <h1>{{ categoria.titulo }}<span class="accent">.</span></h1>
+    <p class="subtitle">{{ categoria.descricao }}</p>
+</section>
+
+<section>
+    <h2 class="section-title">Procedimentos</h2>
+    {% if procedimentos %}
+    <div class="grid">
+        {% for p in procedimentos %}
+        <a class="card" href="/tarefa/{{ p.id }}">
+            <span class="card-tag">{{ categoria.titulo }}</span>
+            <h3>{{ p.titulo }}</h3>
+            <p>{{ p.resumo }}</p>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="vazio">Nenhum procedimento cadastrado nesta categoria ainda.</p>
+    {% endif %}
+</section>
+{% endblock %}
