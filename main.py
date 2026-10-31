@@ -1,24 +1,22 @@
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-
+from fastapi.responses import FileResponse
 from app.routes import router
 
 app = FastAPI(title="Manual de Rastreabilidade")
 
+# Arquivos estáticos (CSS, JS, imagens)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-app.include_router(router)
-
-
+# Rota do Service Worker na raiz
 @app.get("/sw.js")
 def service_worker():
-    return FileResponse("app/static/js/sw.js", media_type="application/javascript")
+    return FileResponse("app/static/sw.js", media_type="application/javascript")
 
-
+# Rota do Manifest na raiz
 @app.get("/manifest.json")
 def manifest():
-    from fastapi.responses import FileResponse
     return FileResponse("app/static/manifest.json", media_type="application/json")
 
-
+# Rotas do app
+app.include_router(router)
