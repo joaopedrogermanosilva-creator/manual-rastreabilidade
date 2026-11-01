@@ -314,6 +314,80 @@ body {
 .btn-cancel { color: var(--text-dim); text-decoration: none; padding: 12px 24px; font-size: 14px; }
 .btn-cancel:hover { color: var(--text); }
 
+/* ===== MODAL DE CONFIRMAÇÃO ===== */
+.confirm-dialog {
+    width: min(440px, calc(100vw - 32px));
+    max-width: 100%;
+    padding: 0;
+    color: var(--text);
+    background: var(--bg-elev);
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+.confirm-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(3px);
+}
+.confirm-dialog-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px;
+    text-align: center;
+}
+.confirm-dialog-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 14px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 50%;
+    font-size: 26px;
+}
+.confirm-dialog-content h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+.confirm-dialog-content p {
+    margin: 0;
+    color: var(--text-dim);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.confirm-dialog-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+    margin-top: 24px;
+}
+.confirm-dialog-actions .btn-cancel,
+.confirm-dialog-actions .btn-danger {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+    border-radius: 7px;
+    padding: 10px 18px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.confirm-dialog-actions .btn-cancel {
+    border: 1px solid var(--border);
+    background: transparent;
+}
+.confirm-dialog-actions .btn-danger {
+    border: 1px solid #dc2626;
+    color: #fff;
+    background: #dc2626;
+}
+.confirm-dialog-actions .btn-danger:hover { background: #b91c1c; }
+
 /* ===== NAVEGAÇÃO HIERÁRQUICA ===== */
 .folder-breadcrumb {
     display: flex;
@@ -340,6 +414,10 @@ body {
     .container { padding: 20px 16px; }
     .hero h1 { font-size: 30px; }
     .folder-breadcrumb { gap: 6px; font-size: 13px; }
+    .confirm-dialog-content { padding: 24px 18px; }
+    .confirm-dialog-actions { flex-direction: column-reverse; }
+    .confirm-dialog-actions .btn-cancel,
+    .confirm-dialog-actions .btn-danger { width: 100%; }
     .topbar { padding: 12px 16px; }
     .acoes-tarefa { flex-direction: column; }
     .btn-editar, .btn-excluir { width: 100%; justify-content: center; }

@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -32,7 +32,7 @@
             {% endfor %}
         </ul>
         <div class="sidebar-footer">
-            <a href="/tarefa/novo" class="btn-primary" onclick="return confirm('Tem certeza que deseja adicionar um novo procedimento?');">+ Novo Procedimento</a>
+            <a href="/tarefa/novo" class="btn-primary">+ Novo Procedimento</a>
         </div>
     </aside>
 
@@ -52,8 +52,21 @@
         {% block content %}{% endblock %}
     </main>
 
+    <dialog id="modal-confirmacao" class="confirm-dialog" aria-labelledby="modal-confirmacao-titulo" aria-describedby="modal-confirmacao-mensagem">
+        <div class="confirm-dialog-content">
+            <span class="confirm-dialog-icon" aria-hidden="true"><i class="ph ph-warning"></i></span>
+            <h2 id="modal-confirmacao-titulo">Confirmar exclusão</h2>
+            <p id="modal-confirmacao-mensagem">Tem certeza de que deseja excluir este item?</p>
+            <div class="confirm-dialog-actions">
+                <button type="button" class="btn-cancel" data-confirm-cancel>Cancelar</button>
+                <button type="button" class="btn-danger" data-confirm-submit>Sim, Excluir</button>
+            </div>
+        </div>
+    </dialog>
+
     <script src="/static/js/theme.js"></script>
     <script src="/static/js/menu.js"></script>
+    <script src="/static/js/confirm.js?v=1"></script>
 
     
 

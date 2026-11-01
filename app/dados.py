@@ -42,6 +42,16 @@ def atualizar_procedimento(proc_id, novos_dados):
     response = supabase.table("procedimentos").update(dados_para_atualizar).eq("id", proc_id).execute()
     return response.data[0] if response.data else None
 
+def remover_foto_legada(proc_id):
+    response = (
+        supabase.table("procedimentos")
+        .update({"arquivo_url": None})
+        .eq("id", proc_id)
+        .select("id")
+        .execute()
+    )
+    return bool(response.data)
+
 def get_anexos_procedimento(proc_id):
     response = (
         supabase.table("anexos")

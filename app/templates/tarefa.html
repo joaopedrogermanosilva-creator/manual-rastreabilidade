@@ -9,7 +9,7 @@
 
     <div class="acoes-tarefa">
         <a href="/tarefa/{{ proc.id }}/editar" class="btn-editar"><i class="ph ph-pencil-simple"></i> Editar</a>
-        <form action="/tarefa/{{ proc.id }}/excluir" method="POST" style="display:inline;" onsubmit="return confirm('Excluir este procedimento?');">
+        <form action="/tarefa/{{ proc.id }}/excluir" method="POST" style="display:inline;" data-confirmation data-confirm-message="Excluir este procedimento?">
             <button type="submit" class="btn-excluir"><i class="ph ph-trash"></i> Excluir</button>
         </form>
     </div>

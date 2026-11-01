@@ -31,8 +31,10 @@
                 </a>
                 {% if anexo.id %}
                 <button type="submit" form="excluir-anexo-{{ anexo.id }}" class="btn-excluir-anexo" aria-label="Excluir {{ anexo.nome_original }}" title="Excluir anexo">Excluir Anexo</button>
+                {% elif anexo.legacy %}
+                <button type="submit" form="excluir-foto-legada" class="btn-excluir-anexo" aria-label="Excluir foto legada" title="Excluir foto legada">Excluir Foto</button>
                 {% else %}
-                <span class="anexo-legado-aviso">Anexo legado</span>
+                <span class="anexo-legado-aviso">Anexo existente</span>
                 {% endif %}
             </div>
             {% endfor %}
@@ -44,7 +46,10 @@
 </form>
 {% for anexo in anexos %}
 {% if anexo.id %}
-<form id="excluir-anexo-{{ anexo.id }}" action="/tarefa/{{ proc.id }}/anexo/{{ anexo.id }}/excluir" method="POST" onsubmit="return confirm('Excluir este anexo?');"></form>
+<form id="excluir-anexo-{{ anexo.id }}" action="/tarefa/{{ proc.id }}/anexo/{{ anexo.id }}/excluir" method="POST" data-confirmation data-confirm-message="Excluir este anexo?"></form>
 {% endif %}
 {% endfor %}
+{% if anexos | selectattr('legacy') | list %}
+<form id="excluir-foto-legada" action="/tarefa/{{ proc.id }}/foto-legada/excluir" method="POST" data-confirmation data-confirm-message="Excluir a foto legada deste procedimento?"></form>
+{% endif %}
 {% endblock %}

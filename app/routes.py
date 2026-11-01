@@ -19,6 +19,7 @@ from app.dados import (
     get_categorias,
     get_procedimentos_por_categoria,
     buscar_procedimentos,
+    remover_foto_legada,
 )
 from app.dados_pastas import (
     buscar_pasta,
@@ -188,6 +189,8 @@ def excluir_anexo_rota(proc_id: int, anexo_id: UUID):
 
     try:
         arquivo_path = _storage_path_from_public_url(anexo.get("arquivo_url", ""))
+        if not arquivo_path:
+            raise HTTPException(400, "Não foi possível identificar o caminho deste anexo no Storage.")
         supabase.storage.from_("documentos").remove([arquivo_path])
     except HTTPException:
         raise
@@ -196,6 +199,26 @@ def excluir_anexo_rota(proc_id: int, anexo_id: UUID):
 
     if not excluir_anexo(anexo_id):
         raise HTTPException(500, "O arquivo foi removido do Storage, mas o registro do anexo não foi removido.")
+    return RedirectResponse(f"/tarefa/{proc_id}/editar", 303)
+
+@router.post("/tarefa/{proc_id}/foto-legada/excluir")
+def excluir_foto_legada_rota(proc_id: int):
+    proc = buscar_procedimento(proc_id)
+    if not proc:
+        raise HTTPException(404, "Procedimento não encontrado.")
+    arquivo_url = proc.get("arquivo_url")
+    if not arquivo_url:
+        raise HTTPException(404, "Este procedimento não possui foto legada.")
+
+    storage_path = _storage_path_from_public_url(arquivo_url)
+    if storage_path:
+        try:
+            supabase.storage.from_("documentos").remove([storage_path])
+        except Exception as exc:
+            raise HTTPException(502, "Não foi possível remover a foto legada do Storage.") from exc
+
+    if not remover_foto_legada(proc_id):
+        raise HTTPException(500, "A foto foi removida do Storage, mas não foi possível limpar o vínculo no procedimento.")
     return RedirectResponse(f"/tarefa/{proc_id}/editar", 303)
 
 @router.post("/tarefa/{proc_id}/excluir")
@@ -299,7 +322,7 @@ def _storage_path_from_public_url(file_url: str):
     marker = "/storage/v1/object/public/documentos/"
     path = unquote(parsed_url.path)
     if marker not in path:
-        raise HTTPException(400, "A URL do anexo não corresponde ao bucket público documentos.")
+        return None
     storage_path = path.split(marker, 1)[1]
     if not storage_path or any(part in {"", ".", ".."} for part in storage_path.split("/")):
         raise HTTPException(400, "O caminho do arquivo no Storage é inválido.")
