@@ -540,6 +540,26 @@ body {
     align-items: center;
     gap: 12px;
 }
+.anexos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+.anexos-grid .arquivo-card { min-width: 0; }
+.anexo-preview {
+    display: block;
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+.anexo-file-icon {
+    font-size: 48px;
+    color: var(--accent);
+}
+@media (max-width: 600px) {
+    .anexos-grid { grid-template-columns: 1fr; }
+}
 .empty-state {
     text-align: center;
     padding: 60px 20px;

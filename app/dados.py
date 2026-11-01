@@ -42,7 +42,30 @@ def atualizar_procedimento(proc_id, novos_dados):
     response = supabase.table("procedimentos").update(dados_para_atualizar).eq("id", proc_id).execute()
     return response.data[0] if response.data else None
 
+def get_anexos_procedimento(proc_id):
+    response = (
+        supabase.table("anexos")
+        .select("*")
+        .eq("procedimento_id", proc_id)
+        .execute()
+    )
+    return response.data
+
+def adicionar_anexo(proc_id, arquivo_url, tipo, nome_original):
+    dados = {
+        "procedimento_id": proc_id,
+        "arquivo_url": arquivo_url,
+        "tipo": tipo,
+        "nome_original": nome_original,
+    }
+    response = supabase.table("anexos").insert(dados).execute()
+    return response.data[0] if response.data else None
+
+def excluir_anexos_procedimento(proc_id):
+    supabase.table("anexos").delete().eq("procedimento_id", proc_id).execute()
+
 def excluir_procedimento(proc_id):
+    excluir_anexos_procedimento(proc_id)
     supabase.table("procedimentos").delete().eq("id", proc_id).execute()
 
 def buscar_procedimentos(termo):

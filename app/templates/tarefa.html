@@ -43,15 +43,28 @@
 
 <section class="bloco">
     <h2 class="section-title"><i class="ph ph-paperclip"></i> 4. Exemplos de documentos</h2>
-    {% if proc.arquivo_url %}
-        <div class="arquivo-card">
-            {% if proc.arquivo_url.endswith('.pdf') %}
-                <i class="ph ph-file-pdf" style="font-size: 48px; color: #dc2626;"></i>
-                <h3>Documento PDF</h3>
-                <a href="{{ proc.arquivo_url }}" target="_blank" class="btn-primary"><i class="ph ph-download-simple"></i> Abrir PDF</a>
-            {% else %}
-                <img src="{{ proc.arquivo_url }}" alt="Exemplo" style="width:100%; max-width: 500px; border-radius:8px; margin-bottom: 16px;">
-            {% endif %}
+    {% if anexos %}
+        <div class="anexos-grid">
+            {% for anexo in anexos %}
+            <article class="arquivo-card">
+                {% if anexo.is_image %}
+                    <a href="{{ anexo.arquivo_url }}" target="_blank" rel="noopener noreferrer">
+                        <img src="{{ anexo.arquivo_url }}" alt="{{ anexo.nome_original }}" class="anexo-preview">
+                    </a>
+                    <h3>{{ anexo.nome_original }}</h3>
+                    <a href="{{ anexo.arquivo_url }}" target="_blank" rel="noopener noreferrer" class="btn-primary">
+                        <i class="ph ph-arrow-square-out"></i> Abrir imagem
+                    </a>
+                {% else %}
+                    <i class="ph {{ anexo.icone }} anexo-file-icon" aria-hidden="true"></i>
+                    <span class="card-tag">{{ anexo.categoria_arquivo }}</span>
+                    <h3>{{ anexo.nome_original }}</h3>
+                    <a href="{{ anexo.arquivo_url }}" target="_blank" rel="noopener noreferrer" class="btn-primary">
+                        <i class="ph ph-download-simple"></i> Baixar / Abrir
+                    </a>
+                {% endif %}
+            </article>
+            {% endfor %}
         </div>
     {% else %}
         <p class="aviso-fase"><i class="ph ph-info"></i> Nenhum arquivo anexado a este procedimento.</p>
