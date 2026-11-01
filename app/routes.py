@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from supabase_client import supabase
 from app.dados import (buscar_procedimento, adicionar_procedimento, atualizar_procedimento, excluir_procedimento, get_categorias, get_procedimentos_por_categoria, buscar_procedimentos)
+from app.pastas_demo import get_demo_tree
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -21,6 +22,14 @@ def categoria(slug: str, request: Request):
 @router.get("/buscar", response_class=HTMLResponse)
 def buscar(request: Request, q: str = ""):
     return templates.TemplateResponse(request=request, name="busca.html", context={"resultados": buscar_procedimentos(q) if q else [], "termo": q, "categorias": get_categorias()})
+
+@router.get("/pastas-demo", response_class=HTMLResponse)
+def pastas_demo(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="pastas_demo.html",
+        context={"categorias": {}, "demo_tree": get_demo_tree()},
+    )
 
 @router.get("/tarefa/novo", response_class=HTMLResponse)
 def form_novo(request: Request):
