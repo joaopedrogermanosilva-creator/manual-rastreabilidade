@@ -22,6 +22,8 @@ def adicionar_procedimento(novo_proc):
         "pontos_atencao": novo_proc["pontos_atencao"],
         "arquivo_url": novo_proc.get("arquivo_url"),
     }
+    if "pasta_id" in novo_proc:
+        dados_para_inserir["pasta_id"] = novo_proc["pasta_id"]
     response = supabase.table("procedimentos").insert(dados_para_inserir).execute()
     return response.data[0] if response.data else None
 
@@ -35,6 +37,8 @@ def atualizar_procedimento(proc_id, novos_dados):
         "pontos_atencao": novos_dados["pontos_atencao"],
         "arquivo_url": novos_dados.get("arquivo_url"),
     }
+    if "pasta_id" in novos_dados:
+        dados_para_atualizar["pasta_id"] = novos_dados["pasta_id"]
     response = supabase.table("procedimentos").update(dados_para_atualizar).eq("id", proc_id).execute()
     return response.data[0] if response.data else None
 

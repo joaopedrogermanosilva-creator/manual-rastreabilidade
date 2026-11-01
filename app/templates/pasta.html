@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{% if pasta %}{{ pasta.nome }}{% else %}Pastas{% endif %} — Manual de Rastreabilidade{% endblock %}
+{% block content %}
+<section class="hero">
+    <nav class="folder-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Início</a>
+        <span aria-hidden="true">›</span>
+        <a href="/pastas">Pastas</a>
+        {% for item in breadcrumb %}
+        <span aria-hidden="true">›</span>
+        {% if not loop.last %}
+        <a href="/pasta/{{ item.id }}">{{ item.nome }}</a>
+        {% else %}
+        <span aria-current="page">{{ item.nome }}</span>
+        {% endif %}
+        {% endfor %}
+    </nav>
+    <h1>{% if pasta %}{{ pasta.nome }}{% else %}Pastas{% endif %}<span class="accent">.</span></h1>
+    {% if pasta and pasta.descricao %}<p class="subtitle">{{ pasta.descricao }}</p>{% endif %}
+</section>
+
+{% if subpastas %}
+<section class="folder-section">
+    <h2 class="section-title">Subpastas</h2>
+    <div class="grid">
+        {% for subpasta in subpastas %}
+        <a class="card folder-card" href="/pasta/{{ subpasta.id }}">
+            <span class="card-tag"><i class="ph ph-folder"></i> Pasta</span>
+            <h3>{{ subpasta.nome }}</h3>
+            <p>{{ subpasta.descricao or "Abrir pasta" }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="folder-section">
+    <h2 class="section-title">Procedimentos</h2>
+    {% if procedimentos %}
+    <div class="grid">
+        {% for procedimento in procedimentos %}
+        <a class="card" href="/tarefa/{{ procedimento.id }}">
+            <span class="card-tag">Procedimento</span>
+            <h3>{{ procedimento.titulo }}</h3>
+            <p>{{ procedimento.resumo }}</p>
+        </a>
+        {% endfor %}
+    </div>
+    {% elif not subpastas %}
+    <p class="vazio">Esta pasta ainda não possui subpastas ou procedimentos.</p>
+    {% else %}
+    <p class="vazio">Nenhum procedimento nesta pasta.</p>
+    {% endif %}
+</section>
+{% endblock %}

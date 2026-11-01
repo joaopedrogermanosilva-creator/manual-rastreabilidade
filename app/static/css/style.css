@@ -314,10 +314,32 @@ body {
 .btn-cancel { color: var(--text-dim); text-decoration: none; padding: 12px 24px; font-size: 14px; }
 .btn-cancel:hover { color: var(--text); }
 
+/* ===== NAVEGAÇÃO HIERÁRQUICA ===== */
+.folder-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    color: var(--text-dim);
+    font-size: 14px;
+}
+.folder-breadcrumb a {
+    color: var(--text-dim);
+    text-decoration: none;
+}
+.folder-breadcrumb a:hover,
+.folder-breadcrumb [aria-current="page"] {
+    color: var(--accent);
+}
+.folder-section { margin-top: 28px; }
+.folder-card .card-tag { display: inline-flex; align-items: center; gap: 6px; }
+
 /* ===== RESPONSIVO PARA CELULAR ===== */
 @media (max-width: 600px) {
     .container { padding: 20px 16px; }
     .hero h1 { font-size: 30px; }
+    .folder-breadcrumb { gap: 6px; font-size: 13px; }
     .topbar { padding: 12px 16px; }
     .acoes-tarefa { flex-direction: column; }
     .btn-editar, .btn-excluir { width: 100%; justify-content: center; }

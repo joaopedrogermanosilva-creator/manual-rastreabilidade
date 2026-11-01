@@ -8,6 +8,7 @@
 <form action="/tarefa/novo" method="POST" class="form-manual" enctype="multipart/form-data">
     <div class="form-group"><label>Título</label><input type="text" name="titulo" required></div>
     <div class="form-group"><label>Categoria</label><select name="categoria" required><option value="">Selecione...</option>{% for slug, cat in categorias.items() %}<option value="{{ slug }}">{{ cat.titulo }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Pasta <small>(opcional durante a migração)</small></label><select name="pasta_id"><option value="__none__">Sem pasta (compatibilidade com categorias)</option>{% for pasta in pastas %}<option value="{{ pasta.id }}">{{ pasta.caminho }}</option>{% endfor %}</select></div>
     <div class="form-group"><label>Resumo Curto</label><input type="text" name="resumo" required></div>
     <div class="form-group"><label>Objetivo</label><textarea name="objetivo" rows="3" required></textarea></div>
     <div class="form-group"><label>Como realizar (um passo por linha)</label><textarea name="como_realizar" rows="5" required></textarea></div>

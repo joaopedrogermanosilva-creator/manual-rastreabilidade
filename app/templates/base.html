@@ -26,6 +26,7 @@
         </div>
         <ul class="sidebar-list">
             <li><a href="/"><i class="ph ph-house"></i> Início</a></li>
+            <li><a href="/pastas"><i class="ph ph-folder-tree"></i> Pastas</a></li>
             {% for slug, cat in categorias.items() %}
             <li><a href="/categoria/{{ slug }}"><i class="ph ph-folder-open"></i> {{ cat.titulo }}</a></li>
             {% endfor %}
