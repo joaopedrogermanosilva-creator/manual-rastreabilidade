@@ -1,6 +1,16 @@
-from fastapi import APIRouter, HTTPException, Request, Form, UploadFile, File
+import logging
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from supabase import create_client
+from supabase.lib.client_options import SyncClientOptions
+from supabase_auth.errors import (
+    AuthApiError,
+    AuthError,
+    AuthInvalidCredentialsError,
+    AuthRetryableError,
+)
 from typing import Annotated
 from uuid import UUID
 import mimetypes
@@ -34,7 +44,16 @@ from app.dados_pastas import (
     obter_breadcrumb,
 )
 
-router = APIRouter()
+logger = logging.getLogger(__name__)
+auth_router = APIRouter()
+
+
+def verificar_login(request: Request):
+    if not request.session.get("usuario_id"):
+        raise HTTPException(status_code=303, headers={"Location": "/login"})
+
+
+router = APIRouter(dependencies=[Depends(verificar_login)])
 CATEGORIA_PASTA_ALIASES = {
     "escala": {"escala-de-abate"},
     "escala-de-abate": {"escala"},
@@ -120,6 +139,7 @@ templates = Jinja2Templates(
     directory="app/templates",
     context_processors=[_menu_context],
 )
+login_templates = Jinja2Templates(directory="app/templates")
 EXTENSOES_ANEXOS_PERMITIDAS = {
     ".pdf",
     ".png",
@@ -145,6 +165,94 @@ EXTENSOES_ANEXOS_PERMITIDAS = {
     ".xls",
     ".xlsx",
 }
+
+
+@auth_router.get("/login", response_class=HTMLResponse)
+def login(request: Request):
+    if request.session.get("usuario_id"):
+        return RedirectResponse("/", 303)
+    return login_templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={"erro": None},
+    )
+
+
+@auth_router.post("/login", response_class=HTMLResponse)
+def autenticar(
+    request: Request,
+    email: Annotated[str, Form()],
+    senha: Annotated[str, Form()],
+):
+    auth_client = create_client(
+        supabase.supabase_url,
+        supabase.supabase_key,
+        options=SyncClientOptions(auto_refresh_token=False, persist_session=False),
+    )
+    try:
+        response = auth_client.auth.sign_in_with_password(
+            {"email": email.strip(), "password": senha}
+        )
+    except AuthInvalidCredentialsError:
+        return login_templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"erro": "E-mail ou senha inválidos."},
+            status_code=401,
+        )
+    except AuthApiError as exc:
+        if exc.code == "invalid_credentials":
+            return login_templates.TemplateResponse(
+                request=request,
+                name="login.html",
+                context={"erro": "E-mail ou senha inválidos."},
+                status_code=401,
+            )
+        logger.exception("Falha na resposta do Supabase Auth.")
+        return login_templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"erro": "Não foi possível autenticar agora. Tente novamente."},
+            status_code=503,
+        )
+    except (AuthRetryableError, httpx.HTTPError):
+        logger.exception("Falha de comunicação com o Supabase Auth.")
+        return login_templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"erro": "Não foi possível autenticar agora. Tente novamente."},
+            status_code=503,
+        )
+    except AuthError:
+        logger.exception("Erro inesperado no Supabase Auth.")
+        return login_templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"erro": "Não foi possível autenticar agora. Tente novamente."},
+            status_code=503,
+        )
+    finally:
+        auth_client.auth.close()
+
+    if not response.user or not response.user.id:
+        logger.error("Supabase Auth retornou sucesso sem identificador de usuário.")
+        return login_templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"erro": "Não foi possível validar esta conta."},
+            status_code=503,
+        )
+
+    request.session.clear()
+    request.session["usuario_id"] = str(response.user.id)
+    return RedirectResponse("/", 303)
+
+
+@auth_router.get("/logout", dependencies=[Depends(verificar_login)])
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/login", 303)
+
 
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request):

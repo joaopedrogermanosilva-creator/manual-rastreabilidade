@@ -703,6 +703,111 @@ body {
     font-size: 15px;
     box-sizing: border-box;
 }
+.sidebar-footer .sidebar-logout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 11px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.sidebar-footer .sidebar-logout:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+/* ===== LOGIN ===== */
+.login-page {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+}
+.login-card {
+    width: min(100%, 420px);
+    padding: 34px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+.login-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 28px;
+    text-align: center;
+}
+.login-brand-mark {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 14px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 50%;
+    font-size: 28px;
+}
+.login-brand h1 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+.login-brand p {
+    margin: 8px 0 0;
+    color: var(--text-dim);
+    font-size: 14px;
+}
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.login-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.login-form input {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 12px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+}
+.login-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+.login-form button {
+    min-height: 46px;
+    margin-top: 4px;
+}
+.login-error {
+    margin: 0;
+    padding: 11px 12px;
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.28);
+    border: 1px solid rgba(248, 113, 113, 0.55);
+    border-radius: 7px;
+    font-size: 14px;
+}
+@media (max-width: 420px) {
+    .login-card { padding: 28px 22px; }
+}
 
 
 /* ===== ÍCONES E DESIGN DOS PASSOS ===== */
