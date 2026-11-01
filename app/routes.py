@@ -23,14 +23,42 @@ from app.dados import (
 )
 from app.dados_pastas import (
     buscar_pasta,
+    criar_pasta,
+    excluir_pasta,
     listar_opcoes_pasta,
     listar_pastas,
     listar_procedimentos_da_pasta,
+    listar_todas_pastas,
     obter_breadcrumb,
 )
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
+
+
+def _menu_context(request: Request):
+    pastas = listar_todas_pastas()
+    arvore = {
+        str(pasta["id"]): {**pasta, "subpastas": []}
+        for pasta in pastas
+    }
+    raizes = []
+
+    for pasta in pastas:
+        pasta_atual = arvore[str(pasta["id"])]
+        parent_id = pasta.get("parent_id")
+        parent = arvore.get(str(parent_id)) if parent_id else None
+        if parent and parent is not pasta_atual:
+            parent["subpastas"].append(pasta_atual)
+        else:
+            raizes.append(pasta_atual)
+
+    return {"menu_pastas": raizes}
+
+
+templates = Jinja2Templates(
+    directory="app/templates",
+    context_processors=[_menu_context],
+)
 EXTENSOES_ANEXOS_PERMITIDAS = {
     ".pdf",
     ".png",
@@ -82,8 +110,68 @@ def pastas_raiz(request: Request):
             "breadcrumb": [],
             "subpastas": listar_pastas(),
             "procedimentos": [],
+            "erro": request.query_params.get("erro"),
         },
     )
+
+
+@router.get("/pastas/nova", response_class=HTMLResponse)
+def form_nova_pasta(request: Request, parent_id: UUID | None = None):
+    if parent_id and not buscar_pasta(parent_id):
+        raise HTTPException(404, "A pasta superior informada não existe.")
+    return templates.TemplateResponse(
+        request=request,
+        name="form_pasta.html",
+        context={
+            "categorias": get_categorias(),
+            "pastas": listar_opcoes_pasta(),
+            "parent_id": str(parent_id) if parent_id else "",
+            "erro": None,
+        },
+    )
+
+
+@router.post("/pastas/nova", response_class=HTMLResponse)
+def salvar_nova_pasta(
+    request: Request,
+    nome: Annotated[str, Form()],
+    descricao: Annotated[str, Form()] = "",
+    parent_id: Annotated[str, Form()] = "",
+):
+    nome = nome.strip()
+    if not nome:
+        return templates.TemplateResponse(
+            request=request,
+            name="form_pasta.html",
+            context={
+                "categorias": get_categorias(),
+                "pastas": listar_opcoes_pasta(),
+                "parent_id": parent_id,
+                "nome": nome,
+                "descricao": descricao,
+                "erro": "Informe um nome para a pasta.",
+            },
+            status_code=422,
+        )
+
+    parent_id_validado = _validar_pasta_id(parent_id)
+    pasta_criada = criar_pasta(nome, descricao, parent_id_validado)
+    if not pasta_criada or not pasta_criada.get("id"):
+        raise HTTPException(500, "Não foi possível confirmar a criação da pasta.")
+    return RedirectResponse(f"/pasta/{pasta_criada['id']}", 303)
+
+
+@router.post("/pastas/{pasta_id}/excluir")
+def excluir_pasta_rota(pasta_id: UUID):
+    pasta_atual = buscar_pasta(pasta_id)
+    if not pasta_atual:
+        raise HTTPException(404, "Pasta não encontrada.")
+
+    destino = f"/pasta/{pasta_atual['parent_id']}" if pasta_atual.get("parent_id") else "/pastas"
+    if not excluir_pasta(pasta_id):
+        return RedirectResponse(f"{destino}?erro=pasta_nao_vazia", 303)
+    return RedirectResponse(destino, 303)
+
 
 @router.get("/pasta/{pasta_id}", response_class=HTMLResponse)
 def pasta(pasta_id: UUID, request: Request):
@@ -99,6 +187,7 @@ def pasta(pasta_id: UUID, request: Request):
             "breadcrumb": obter_breadcrumb(pasta_id),
             "subpastas": listar_pastas(pasta_id),
             "procedimentos": listar_procedimentos_da_pasta(pasta_id),
+            "erro": request.query_params.get("erro"),
         },
     )
 

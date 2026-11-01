@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <link rel="stylesheet" href="/static/css/style.css?v=5">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -26,7 +26,18 @@
         </div>
         <ul class="sidebar-list">
             <li><a href="/"><i class="ph ph-house"></i> Início</a></li>
-            <li><a href="/pastas"><i class="ph ph-folder-tree"></i> Pastas</a></li>
+            <li><a href="/pastas"><i class="ph ph-folder-tree"></i> Explorador de Pastas</a></li>
+            {% macro render_pastas_menu(pastas) %}
+            {% for pasta in pastas %}
+            <li>
+                <a class="sidebar-folder-link" href="/pasta/{{ pasta.id }}"><i class="ph ph-folder"></i> {{ pasta.nome }}</a>
+                {% if pasta.subpastas %}
+                <ul class="sidebar-list sidebar-sublist">{{ render_pastas_menu(pasta.subpastas) }}</ul>
+                {% endif %}
+            </li>
+            {% endfor %}
+            {% endmacro %}
+            {{ render_pastas_menu(menu_pastas) }}
             {% for slug, cat in categorias.items() %}
             <li><a href="/categoria/{{ slug }}"><i class="ph ph-folder-open"></i> {{ cat.titulo }}</a></li>
             {% endfor %}

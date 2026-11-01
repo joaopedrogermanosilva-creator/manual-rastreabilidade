@@ -157,6 +157,7 @@ def excluir_pasta(pasta_id: UUID | str):
         supabase.table("pastas")
         .delete()
         .eq("id", str(pasta_id))
+        .select("id")
         .execute()
     )
     return bool(response.data)

@@ -17,18 +17,34 @@
     </nav>
     <h1>{% if pasta %}{{ pasta.nome }}{% else %}Pastas{% endif %}<span class="accent">.</span></h1>
     {% if pasta and pasta.descricao %}<p class="subtitle">{{ pasta.descricao }}</p>{% endif %}
+    <div class="folder-actions">
+        <a class="btn-primary" href="/pastas/nova{% if pasta %}?parent_id={{ pasta.id }}{% endif %}">
+            <i class="ph ph-folder-plus"></i> Nova Pasta
+        </a>
+    </div>
 </section>
+
+{% if erro == "pasta_nao_vazia" %}
+<p class="folder-alert" role="alert">Esta pasta não pode ser excluída porque ainda contém subpastas ou procedimentos.</p>
+{% endif %}
 
 {% if subpastas %}
 <section class="folder-section">
     <h2 class="section-title">Subpastas</h2>
     <div class="grid">
         {% for subpasta in subpastas %}
-        <a class="card folder-card" href="/pasta/{{ subpasta.id }}">
-            <span class="card-tag"><i class="ph ph-folder"></i> Pasta</span>
-            <h3>{{ subpasta.nome }}</h3>
-            <p>{{ subpasta.descricao or "Abrir pasta" }}</p>
-        </a>
+        <article class="card folder-card">
+            <a class="folder-card-link" href="/pasta/{{ subpasta.id }}">
+                <span class="card-tag"><i class="ph ph-folder"></i> Pasta</span>
+                <h3>{{ subpasta.nome }}</h3>
+                <p>{{ subpasta.descricao or "Abrir pasta" }}</p>
+            </a>
+            <form action="/pastas/{{ subpasta.id }}/excluir" method="POST" data-confirmation data-confirm-message="Excluir a pasta {{ subpasta.nome }}? Somente pastas vazias podem ser excluídas.">
+                <button type="submit" class="btn-folder-delete" aria-label="Excluir pasta {{ subpasta.nome }}" title="Excluir pasta">
+                    <i class="ph ph-trash" aria-hidden="true"></i><span>Excluir</span>
+                </button>
+            </form>
+        </article>
         {% endfor %}
     </div>
 </section>
