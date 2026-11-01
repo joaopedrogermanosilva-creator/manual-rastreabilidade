@@ -4,7 +4,6 @@ from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from supabase_client import supabase
 from app.dados import (buscar_procedimento, adicionar_procedimento, atualizar_procedimento, excluir_procedimento, get_categorias, get_procedimentos_por_categoria, buscar_procedimentos)
-from app.pastas_demo import get_demo_tree
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -22,14 +21,6 @@ def categoria(slug: str, request: Request):
 @router.get("/buscar", response_class=HTMLResponse)
 def buscar(request: Request, q: str = ""):
     return templates.TemplateResponse(request=request, name="busca.html", context={"resultados": buscar_procedimentos(q) if q else [], "termo": q, "categorias": get_categorias()})
-
-@router.get("/pastas-demo", response_class=HTMLResponse)
-def pastas_demo(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="pastas_demo.html",
-        context={"categorias": {}, "demo_tree": get_demo_tree()},
-    )
 
 @router.get("/tarefa/novo", response_class=HTMLResponse)
 def form_novo(request: Request):
@@ -59,7 +50,8 @@ def form_editar(proc_id: int, request: Request):
 def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annotated[str, Form()], resumo: Annotated[str, Form()], objetivo: Annotated[str, Form()], como_realizar: Annotated[str, Form()], pontos_atencao: Annotated[str, Form()] = "", arquivo: UploadFile = File(None)):
     passos = [p.strip() for p in como_realizar.strip().split("\n") if p.strip()]
     pontos = [p.strip() for p in pontos_atencao.strip().split("\n") if p.strip()]
-    url = buscar_procedimento(proc_id).get("arquivo_url")
+    proc_atual = buscar_procedimento(proc_id)
+    url = proc_atual.get("arquivo_url") if proc_atual else None
     if arquivo and arquivo.filename:
         try:
             path = f"proc_{titulo.replace(' ', '_')}_{arquivo.filename}"
@@ -72,7 +64,9 @@ def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annot
 @router.post("/tarefa/{proc_id}/excluir")
 def excluir(proc_id: int):
     proc = buscar_procedimento(proc_id)
-    if proc: excluir_procedimento(proc_id); return RedirectResponse(f"/categoria/{proc['categoria_slug']}", 303)
+    if proc:
+        excluir_procedimento(proc_id)
+        return RedirectResponse(f"/categoria/{proc['categoria_slug']}", 303)
     raise HTTPException(404)
 
 @router.get("/tarefa/{proc_id}", response_class=HTMLResponse)

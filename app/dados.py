@@ -33,6 +33,7 @@ def atualizar_procedimento(proc_id, novos_dados):
         "objetivo": novos_dados["objetivo"],
         "como_realizar": novos_dados["como_realizar"],
         "pontos_atencao": novos_dados["pontos_atencao"],
+        "arquivo_url": novos_dados.get("arquivo_url"),
     }
     response = supabase.table("procedimentos").update(dados_para_atualizar).eq("id", proc_id).execute()
     return response.data[0] if response.data else None
@@ -40,12 +41,8 @@ def atualizar_procedimento(proc_id, novos_dados):
 def excluir_procedimento(proc_id):
     supabase.table("procedimentos").delete().eq("id", proc_id).execute()
 
-
 def buscar_procedimentos(termo):
-    """Busca global usando ilike no Supabase."""
-    if not termo:
-        return []
-    # O Supabase permite busca com .or_ para verificar múltiplas colunas
+    if not termo: return []
     response = supabase.table("procedimentos").select("*").or_(
         f"titulo.ilike.%{termo}%,resumo.ilike.%{termo}%,objetivo.ilike.%{termo}%"
     ).execute()
