@@ -11,7 +11,9 @@ from app.dados import (
     adicionar_anexo,
     adicionar_procedimento,
     atualizar_procedimento,
+    buscar_anexo,
     buscar_procedimento,
+    excluir_anexo,
     excluir_procedimento,
     get_anexos_procedimento,
     get_categorias,
@@ -130,7 +132,27 @@ def salvar_novo(titulo: Annotated[str, Form()], categoria: Annotated[str, Form()
 def form_editar(proc_id: int, request: Request):
     proc = buscar_procedimento(proc_id)
     if not proc: raise HTTPException(404)
-    return templates.TemplateResponse(request=request, name="form_editar.html", context={"proc": proc, "categorias": get_categorias(), "pastas": listar_opcoes_pasta()})
+    anexos = get_anexos_procedimento(proc_id)
+    if proc.get("arquivo_url") and not any(item.get("arquivo_url") == proc["arquivo_url"] for item in anexos):
+        legacy_name = unquote(urlsplit(proc["arquivo_url"]).path.rsplit("/", 1)[-1]) or "Arquivo existente"
+        anexos.append({
+            "id": None,
+            "arquivo_url": proc["arquivo_url"],
+            "nome_original": legacy_name,
+            "tipo": mimetypes.guess_type(legacy_name)[0] or "application/octet-stream",
+            "legacy": True,
+        })
+    anexos = [_preparar_anexo_para_exibicao(item) for item in anexos]
+    return templates.TemplateResponse(
+        request=request,
+        name="form_editar.html",
+        context={
+            "proc": proc,
+            "categorias": get_categorias(),
+            "pastas": listar_opcoes_pasta(),
+            "anexos": anexos,
+        },
+    )
 
 @router.post("/tarefa/{proc_id}/editar")
 def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annotated[str, Form()], resumo: Annotated[str, Form()], objetivo: Annotated[str, Form()], como_realizar: Annotated[str, Form()], pontos_atencao: Annotated[str, Form()] = "", pasta_id: Annotated[str | None, Form()] = None, arquivo: UploadFile | None = File(None), arquivos: list[UploadFile] | None = File(None)):
@@ -157,6 +179,24 @@ def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annot
     if arquivos_validados:
         _salvar_anexos(proc_id, arquivos_validados)
     return RedirectResponse(f"/tarefa/{proc_id}", 303)
+
+@router.post("/tarefa/{proc_id}/anexo/{anexo_id}/excluir")
+def excluir_anexo_rota(proc_id: int, anexo_id: UUID):
+    anexo = buscar_anexo(anexo_id)
+    if not anexo or anexo.get("procedimento_id") != proc_id:
+        raise HTTPException(404, "Anexo não encontrado para este procedimento.")
+
+    try:
+        arquivo_path = _storage_path_from_public_url(anexo.get("arquivo_url", ""))
+        supabase.storage.from_("documentos").remove([arquivo_path])
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(502, "Não foi possível remover o arquivo do Storage.") from exc
+
+    if not excluir_anexo(anexo_id):
+        raise HTTPException(500, "O arquivo foi removido do Storage, mas o registro do anexo não foi removido.")
+    return RedirectResponse(f"/tarefa/{proc_id}/editar", 303)
 
 @router.post("/tarefa/{proc_id}/excluir")
 def excluir(proc_id: int):
@@ -253,6 +293,17 @@ def _preparar_anexo_para_exibicao(anexo: dict):
         "icone": icone,
         "categoria_arquivo": categoria_arquivo,
     }
+
+def _storage_path_from_public_url(file_url: str):
+    parsed_url = urlsplit(file_url)
+    marker = "/storage/v1/object/public/documentos/"
+    path = unquote(parsed_url.path)
+    if marker not in path:
+        raise HTTPException(400, "A URL do anexo não corresponde ao bucket público documentos.")
+    storage_path = path.split(marker, 1)[1]
+    if not storage_path or any(part in {"", ".", ".."} for part in storage_path.split("/")):
+        raise HTTPException(400, "O caminho do arquivo no Storage é inválido.")
+    return storage_path
 
 def _validar_pasta_id(pasta_id: str | None):
     if not pasta_id or pasta_id == "__none__":

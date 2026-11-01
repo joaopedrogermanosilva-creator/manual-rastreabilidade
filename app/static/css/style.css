@@ -530,6 +530,9 @@ body {
     line-height: 1.5;
 }
 .arquivo-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     background: var(--bg);
     padding: 24px;
     border-radius: 8px;
@@ -542,23 +545,95 @@ body {
 }
 .anexos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
     gap: 16px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
-.anexos-grid .arquivo-card { min-width: 0; }
+.anexos-grid .arquivo-card { min-width: 0; overflow-wrap: anywhere; }
 .anexo-preview {
     display: block;
-    width: 100%;
+    max-width: 100%;
     max-height: 320px;
+    height: auto;
     object-fit: contain;
     border-radius: 8px;
 }
 .anexo-file-icon {
     font-size: 48px;
     color: var(--accent);
+    max-width: 100%;
+    flex-shrink: 0;
+}
+.editar-anexos-lista {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+}
+.editar-anexo-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+}
+.editar-anexo-item > a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--text);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+.editar-anexo-item > a span { overflow-wrap: anywhere; }
+.editar-anexo-preview {
+    display: block;
+    max-width: 100%;
+    width: 64px;
+    height: auto;
+    max-height: 64px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex: 0 1 64px;
+}
+.editar-anexo-icone {
+    color: var(--accent);
+    font-size: 28px;
+    flex: 0 0 auto;
+}
+.btn-excluir-anexo {
+    flex: 0 0 auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: transparent;
+    color: var(--text-dim);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+.btn-excluir-anexo:hover {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+.anexo-legado-aviso {
+    flex: 0 0 auto;
+    color: var(--text-dim);
+    font-size: 12px;
 }
 @media (max-width: 600px) {
     .anexos-grid { grid-template-columns: 1fr; }
+    .arquivo-card { padding: 16px; }
+    .editar-anexo-item { align-items: flex-start; gap: 8px; }
+    .btn-excluir-anexo { padding: 7px; }
+    .anexo-file-icon { font-size: 40px; }
 }
 .empty-state {
     text-align: center;

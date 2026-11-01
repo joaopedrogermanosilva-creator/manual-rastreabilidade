@@ -17,9 +17,34 @@
 ') }}</textarea></div>
     <div class="form-group">
         <label>Anexar Arquivos (Fotos, PDFs, Documentos)</label>
-        {% if proc.arquivo_url %}<p style="font-size:12px;">Atual: <a href="{{ proc.arquivo_url }}" target="_blank">Ver arquivo</a></p>{% endif %}
+        {% if anexos %}
+        <div class="editar-anexos-lista" aria-label="Anexos existentes">
+            {% for anexo in anexos %}
+            <div class="editar-anexo-item">
+                <a href="{{ anexo.arquivo_url }}" target="_blank" rel="noopener noreferrer">
+                    {% if anexo.is_image %}
+                    <img src="{{ anexo.arquivo_url }}" alt="" class="editar-anexo-preview">
+                    {% else %}
+                    <i class="ph {{ anexo.icone }} editar-anexo-icone" aria-hidden="true"></i>
+                    {% endif %}
+                    <span>{{ anexo.nome_original }}</span>
+                </a>
+                {% if anexo.id %}
+                <button type="submit" form="excluir-anexo-{{ anexo.id }}" class="btn-excluir-anexo" aria-label="Excluir {{ anexo.nome_original }}" title="Excluir anexo">Excluir Anexo</button>
+                {% else %}
+                <span class="anexo-legado-aviso">Anexo legado</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <input type="file" name="arquivos" multiple accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
     </div>
     <div class="form-actions"><a href="/tarefa/{{ proc.id }}" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar</button></div>
 </form>
+{% for anexo in anexos %}
+{% if anexo.id %}
+<form id="excluir-anexo-{{ anexo.id }}" action="/tarefa/{{ proc.id }}/anexo/{{ anexo.id }}/excluir" method="POST" onsubmit="return confirm('Excluir este anexo?');"></form>
+{% endif %}
+{% endfor %}
 {% endblock %}

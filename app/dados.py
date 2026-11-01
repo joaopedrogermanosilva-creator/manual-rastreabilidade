@@ -61,6 +61,26 @@ def adicionar_anexo(proc_id, arquivo_url, tipo, nome_original):
     response = supabase.table("anexos").insert(dados).execute()
     return response.data[0] if response.data else None
 
+def buscar_anexo(anexo_id):
+    response = (
+        supabase.table("anexos")
+        .select("*")
+        .eq("id", anexo_id)
+        .limit(1)
+        .execute()
+    )
+    return response.data[0] if response.data else None
+
+def excluir_anexo(anexo_id):
+    response = (
+        supabase.table("anexos")
+        .delete()
+        .eq("id", anexo_id)
+        .select("id")
+        .execute()
+    )
+    return bool(response.data)
+
 def excluir_anexos_procedimento(proc_id):
     supabase.table("anexos").delete().eq("procedimento_id", proc_id).execute()
 
