@@ -1,3 +1,4 @@
+import logging
 import hmac
 import os
 from fastapi import APIRouter, Depends, HTTPException, Request, Form, UploadFile, File
@@ -36,6 +37,7 @@ from app.dados_pastas import (
     obter_breadcrumb,
 )
 
+logger = logging.getLogger(__name__)
 auth_router = APIRouter()
 
 
@@ -349,12 +351,29 @@ def salvar_novo(titulo: Annotated[str, Form()], categoria: Annotated[str, Form()
             path = f"proc_{titulo.replace(' ', '_')}_{arquivo.filename}"
             supabase.storage.from_("documentos").upload(path, arquivo.file.read())
             url = supabase.storage.from_("documentos").get_public_url(path)
-        except Exception as e: print(f"Erro Upload: {e}")
+        except Exception as exc:
+            logger.exception("Falha ao enviar arquivo legado do novo procedimento.")
+            raise HTTPException(
+                502, "Não foi possível enviar o arquivo do procedimento."
+            ) from exc
     procedimento = adicionar_procedimento({"categoria": categoria, "titulo": titulo, "resumo": resumo, "objetivo": objetivo, "como_realizar": passos, "pontos_atencao": pontos, "arquivo_url": url, "pasta_id": pasta_id_validado})
+    if not procedimento or procedimento.get("id") is None:
+        raise HTTPException(
+            500, "Não foi possível confirmar a criação do procedimento."
+        )
     if arquivos_validados:
-        if not procedimento or procedimento.get("id") is None:
-            raise HTTPException(500, "O procedimento foi salvo, mas não foi possível obter seu identificador para associar os arquivos.")
-        _salvar_anexos(procedimento["id"], arquivos_validados)
+        try:
+            _salvar_anexos(procedimento["id"], arquivos_validados)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.exception(
+                "Falha ao enviar ou registrar anexos do procedimento %s.",
+                procedimento["id"],
+            )
+            raise HTTPException(
+                502, "O procedimento foi salvo, mas houve uma falha ao enviar os anexos."
+            ) from exc
     if pasta_id_validado:
         return RedirectResponse(f"/pasta/{pasta_id_validado}", 303)
     return RedirectResponse(f"/categoria/{categoria}", 303)
