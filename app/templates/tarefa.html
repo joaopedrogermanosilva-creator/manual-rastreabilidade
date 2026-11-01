@@ -3,14 +3,18 @@
 
 {% block content %}
 <section class="hero">
+    {% if pasta %}
+    <a href="/pasta/{{ pasta.id }}" class="back-link"><i class="ph ph-arrow-left"></i> Voltar para {{ pasta.nome }}</a>
+    {% else %}
     <a href="/categoria/{{ proc.categoria_slug }}" class="back-link"><i class="ph ph-arrow-left"></i> Voltar para {{ categoria.titulo }}</a>
+    {% endif %}
     <h1>{{ proc.titulo }}<span class="accent">.</span></h1>
     <p class="subtitle">{{ proc.resumo }}</p>
 
     <div class="acoes-tarefa">
         <a href="/tarefa/{{ proc.id }}/editar" class="btn-editar"><i class="ph ph-pencil-simple"></i> Editar</a>
         <form action="/tarefa/{{ proc.id }}/excluir" method="POST" style="display:inline;" data-confirmation data-confirm-message="Excluir este procedimento?">
-            <button type="submit" class="btn-excluir"><i class="ph ph-trash"></i> Excluir</button>
+            <button type="submit" class="btn-excluir-discreto" aria-label="Excluir procedimento" title="Excluir procedimento"><i class="ph ph-trash"></i></button>
         </form>
     </div>
 </section>

@@ -14,12 +14,36 @@
             </div>
         </form>
         
-        <div class="quick-links">
-            <a href="/categoria/operacoes" class="quick-link">&#128196; Operações</a>
-            <a href="/categoria/documentos" class="quick-link">&#128196; Documentos</a>
-            <a href="/categoria/escala" class="quick-link">&#128196; Escala</a>
-            <a href="/categoria/rastreio" class="quick-link">&#128196; Rastreio</a>
-        </div>
     </div>
+</section>
+
+<section class="folder-section home-folders">
+    <div class="home-folders-heading">
+        <h2 class="section-title">Pastas principais</h2>
+        <a class="btn-primary" href="/pastas/nova"><i class="ph ph-folder-plus"></i> Nova Pasta</a>
+    </div>
+    {% if erro == "pasta_nao_vazia" %}
+    <p class="folder-alert" role="alert">Esta pasta não pode ser excluída porque ainda contém subpastas ou procedimentos.</p>
+    {% endif %}
+    {% if pastas_raiz %}
+    <div class="grid">
+        {% for pasta in pastas_raiz %}
+        <article class="card folder-card">
+            <a class="folder-card-link" href="/pasta/{{ pasta.id }}">
+                <span class="card-tag"><i class="ph ph-folder"></i> Pasta</span>
+                <h3>{{ pasta.nome }}</h3>
+                <p>{{ pasta.descricao or "Abrir pasta" }}</p>
+            </a>
+            <form action="/pastas/{{ pasta.id }}/excluir" method="POST" data-confirmation data-confirm-message="Excluir a pasta {{ pasta.nome }}? Só é possível excluir pastas sem subpastas ou procedimentos.">
+                <button type="submit" class="btn-folder-delete" aria-label="Excluir pasta {{ pasta.nome }}" title="Excluir pasta">
+                    <i class="ph ph-trash" aria-hidden="true"></i><span>Excluir pasta</span>
+                </button>
+            </form>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="vazio">Nenhuma pasta cadastrada. Crie uma pasta para começar a organizar os procedimentos.</p>
+    {% endif %}
 </section>
 {% endblock %}

@@ -5,7 +5,7 @@
     <nav class="folder-breadcrumb" aria-label="Breadcrumb">
         <a href="/">Início</a>
         <span aria-hidden="true">›</span>
-        <a href="/pastas">Pastas</a>
+        <a href="/">Pastas principais</a>
         {% for item in breadcrumb %}
         <span aria-hidden="true">›</span>
         {% if not loop.last %}
@@ -21,6 +21,11 @@
         <a class="btn-primary" href="/pastas/nova{% if pasta %}?parent_id={{ pasta.id }}{% endif %}">
             <i class="ph ph-folder-plus"></i> Nova Pasta
         </a>
+        {% if pasta %}
+        <a class="btn-primary" href="/tarefa/novo?pasta_id={{ pasta.id }}">
+            <i class="ph ph-plus-circle"></i> Novo Procedimento nesta Pasta
+        </a>
+        {% endif %}
     </div>
 </section>
 
@@ -28,7 +33,7 @@
 <p class="folder-alert" role="alert">Esta pasta não pode ser excluída porque ainda contém subpastas ou procedimentos.</p>
 {% endif %}
 
-{% if subpastas %}
+{% if pasta and subpastas %}
 <section class="folder-section">
     <h2 class="section-title">Subpastas</h2>
     <div class="grid">
@@ -50,6 +55,7 @@
 </section>
 {% endif %}
 
+{% if pasta %}
 <section class="folder-section">
     <h2 class="section-title">Procedimentos</h2>
     {% if procedimentos %}
@@ -68,4 +74,5 @@
     <p class="vazio">Nenhum procedimento nesta pasta.</p>
     {% endif %}
 </section>
+{% endif %}
 {% endblock %}

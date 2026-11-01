@@ -4,6 +4,8 @@ from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from uuid import UUID
 import mimetypes
+import re
+import unicodedata
 from urllib.parse import unquote, urlsplit
 from uuid import uuid4
 from supabase_client import supabase
@@ -33,9 +35,33 @@ from app.dados_pastas import (
 )
 
 router = APIRouter()
+CATEGORIA_PASTA_ALIASES = {
+    "escala": {"escala-de-abate"},
+    "escala-de-abate": {"escala"},
+    "rastreio": {"rastreabilidade"},
+    "rastreabilidade": {"rastreio"},
+}
 
 
-def _menu_context(request: Request):
+def _slug_pasta(valor: str) -> str:
+    normalizado = unicodedata.normalize("NFKD", valor)
+    sem_acentos = normalizado.encode("ascii", "ignore").decode("ascii").lower()
+    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", sem_acentos)).strip("-")
+
+
+def _chaves_categoria(slug: str, categoria: dict | None = None):
+    chaves = {_slug_pasta(slug)}
+    if categoria and categoria.get("titulo"):
+        chaves.add(_slug_pasta(categoria["titulo"]))
+    chaves.update(
+        alias
+        for chave in tuple(chaves)
+        for alias in CATEGORIA_PASTA_ALIASES.get(chave, set())
+    )
+    return chaves
+
+
+def get_menu_completo():
     pastas = listar_todas_pastas()
     arvore = {
         str(pasta["id"]): {**pasta, "subpastas": []}
@@ -52,7 +78,42 @@ def _menu_context(request: Request):
         else:
             raizes.append(pasta_atual)
 
-    return {"menu_pastas": raizes}
+    return raizes
+
+
+def _menu_context(request: Request):
+    return {"menu_pastas": get_menu_completo()}
+
+
+def _buscar_pasta_da_categoria(slug: str, categoria: dict | None = None):
+    chaves = _chaves_categoria(slug, categoria)
+    return next(
+        (
+            pasta
+            for pasta in listar_todas_pastas()
+            if not pasta.get("parent_id") and _slug_pasta(pasta["nome"]) in chaves
+        ),
+        None,
+    )
+
+
+def _categoria_da_pasta(pasta: dict, categorias: dict):
+    chaves = _chaves_categoria(pasta["nome"], pasta)
+    for slug, categoria in categorias.items():
+        if _slug_pasta(slug) in chaves or _slug_pasta(categoria["titulo"]) in chaves:
+            return slug
+    return ""
+
+
+def _categorias_da_pasta(pasta: dict, categorias: dict):
+    chaves_pasta = _chaves_categoria(pasta["nome"], pasta)
+    if pasta.get("parent_id"):
+        return []
+    return [
+        slug
+        for slug, categoria in categorias.items()
+        if chaves_pasta.intersection(_chaves_categoria(slug, categoria))
+    ]
 
 
 templates = Jinja2Templates(
@@ -87,32 +148,33 @@ EXTENSOES_ANEXOS_PERMITIDAS = {
 
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse(request=request, name="index.html", context={"categorias": get_categorias()})
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "categorias": get_categorias(),
+            "pastas_raiz": listar_pastas(),
+            "erro": request.query_params.get("erro"),
+        },
+    )
 
 @router.get("/categoria/{slug}", response_class=HTMLResponse)
 def categoria(slug: str, request: Request):
     cats = get_categorias()
-    if slug not in cats: raise HTTPException(404)
+    if slug not in cats:
+        raise HTTPException(404)
+    pasta_correspondente = _buscar_pasta_da_categoria(slug, cats[slug])
+    if pasta_correspondente:
+        return RedirectResponse(f"/pasta/{pasta_correspondente['id']}", 307)
     return templates.TemplateResponse(request=request, name="categoria.html", context={"categoria": cats[slug], "categoria_slug": slug, "procedimentos": get_procedimentos_por_categoria(slug), "categorias": cats})
 
 @router.get("/buscar", response_class=HTMLResponse)
 def buscar(request: Request, q: str = ""):
     return templates.TemplateResponse(request=request, name="busca.html", context={"resultados": buscar_procedimentos(q) if q else [], "termo": q, "categorias": get_categorias()})
 
-@router.get("/pastas", response_class=HTMLResponse)
-def pastas_raiz(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="pasta.html",
-        context={
-            "categorias": get_categorias(),
-            "pasta": None,
-            "breadcrumb": [],
-            "subpastas": listar_pastas(),
-            "procedimentos": [],
-            "erro": request.query_params.get("erro"),
-        },
-    )
+@router.get("/pastas", include_in_schema=False)
+def pastas_legado():
+    return RedirectResponse("/", 307)
 
 
 @router.get("/pastas/nova", response_class=HTMLResponse)
@@ -158,7 +220,8 @@ def salvar_nova_pasta(
     pasta_criada = criar_pasta(nome, descricao, parent_id_validado)
     if not pasta_criada or not pasta_criada.get("id"):
         raise HTTPException(500, "Não foi possível confirmar a criação da pasta.")
-    return RedirectResponse(f"/pasta/{pasta_criada['id']}", 303)
+    destino = f"/pasta/{parent_id_validado}" if parent_id_validado else "/"
+    return RedirectResponse(destino, 303)
 
 
 @router.post("/pastas/{pasta_id}/excluir")
@@ -167,7 +230,7 @@ def excluir_pasta_rota(pasta_id: UUID):
     if not pasta_atual:
         raise HTTPException(404, "Pasta não encontrada.")
 
-    destino = f"/pasta/{pasta_atual['parent_id']}" if pasta_atual.get("parent_id") else "/pastas"
+    destino = f"/pasta/{pasta_atual['parent_id']}" if pasta_atual.get("parent_id") else "/"
     if not excluir_pasta(pasta_id):
         return RedirectResponse(f"{destino}?erro=pasta_nao_vazia", 303)
     return RedirectResponse(destino, 303)
@@ -178,22 +241,48 @@ def pasta(pasta_id: UUID, request: Request):
     pasta_atual = buscar_pasta(pasta_id)
     if not pasta_atual:
         raise HTTPException(404)
+    categorias = get_categorias()
+    procedimentos = listar_procedimentos_da_pasta(pasta_id)
+    ids_procedimentos = {str(item["id"]) for item in procedimentos}
+    for categoria_slug in _categorias_da_pasta(pasta_atual, categorias):
+        for procedimento in get_procedimentos_por_categoria(categoria_slug):
+            procedimento_pasta_id = procedimento.get("pasta_id")
+            procedimento_id = str(procedimento["id"])
+            if (
+                not procedimento_pasta_id
+                and procedimento_id not in ids_procedimentos
+            ):
+                procedimentos.append(procedimento)
+                ids_procedimentos.add(procedimento_id)
     return templates.TemplateResponse(
         request=request,
         name="pasta.html",
         context={
-            "categorias": get_categorias(),
+            "categorias": categorias,
             "pasta": pasta_atual,
             "breadcrumb": obter_breadcrumb(pasta_id),
             "subpastas": listar_pastas(pasta_id),
-            "procedimentos": listar_procedimentos_da_pasta(pasta_id),
+            "procedimentos": procedimentos,
             "erro": request.query_params.get("erro"),
         },
     )
 
 @router.get("/tarefa/novo", response_class=HTMLResponse)
-def form_novo(request: Request):
-    return templates.TemplateResponse(request=request, name="form.html", context={"categorias": get_categorias(), "pastas": listar_opcoes_pasta()})
+def form_novo(request: Request, pasta_id: UUID | None = None):
+    pasta_atual = buscar_pasta(pasta_id) if pasta_id else None
+    if pasta_id and not pasta_atual:
+        raise HTTPException(404, "A pasta selecionada não existe.")
+    categorias = get_categorias()
+    return templates.TemplateResponse(
+        request=request,
+        name="form.html",
+        context={
+            "categorias": categorias,
+            "pastas": listar_opcoes_pasta(),
+            "pasta_id_selecionada": str(pasta_id) if pasta_id else "",
+            "categoria_selecionada": _categoria_da_pasta(pasta_atual, categorias) if pasta_atual else "",
+        },
+    )
 
 @router.post("/tarefa/novo")
 def salvar_novo(titulo: Annotated[str, Form()], categoria: Annotated[str, Form()], resumo: Annotated[str, Form()], objetivo: Annotated[str, Form()], como_realizar: Annotated[str, Form()], pontos_atencao: Annotated[str, Form()] = "", pasta_id: Annotated[str | None, Form()] = None, arquivo: UploadFile | None = File(None), arquivos: list[UploadFile] | None = File(None)):
@@ -315,6 +404,8 @@ def excluir(proc_id: int):
     proc = buscar_procedimento(proc_id)
     if proc:
         excluir_procedimento(proc_id)
+        if proc.get("pasta_id"):
+            return RedirectResponse(f"/pasta/{proc['pasta_id']}", 303)
         return RedirectResponse(f"/categoria/{proc['categoria_slug']}", 303)
     raise HTTPException(404)
 
@@ -324,6 +415,7 @@ def tarefa(proc_id: int, request: Request):
     if not proc: raise HTTPException(404)
     cats = get_categorias()
     anexos = get_anexos_procedimento(proc_id)
+    pasta_atual = buscar_pasta(proc["pasta_id"]) if proc.get("pasta_id") else None
     urls_anexos = {item.get("arquivo_url") for item in anexos}
     if proc.get("arquivo_url") and proc["arquivo_url"] not in urls_anexos:
         legacy_name = unquote(urlsplit(proc["arquivo_url"]).path.rsplit("/", 1)[-1]) or "Arquivo existente"
@@ -340,6 +432,7 @@ def tarefa(proc_id: int, request: Request):
         context={
             "proc": proc,
             "categoria": cats.get(proc["categoria_slug"], {"titulo": ""}),
+            "pasta": pasta_atual,
             "categorias": cats,
             "anexos": anexos,
         },
