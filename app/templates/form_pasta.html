@@ -2,7 +2,7 @@
 {% block title %}Nova Pasta — Manual de Rastreabilidade{% endblock %}
 {% block content %}
 <section class="hero">
-    <a href="{% if parent_id %}/pasta/{{ parent_id }}{% else %}/{% endif %}" class="back-link"><i class="ph ph-arrow-left"></i> Voltar</a>
+    <a href="/" class="back-link"><i class="ph ph-arrow-left"></i> Voltar à página inicial</a>
     <h1>Nova Pasta<span class="accent">.</span></h1>
 </section>
 {% if erro %}
@@ -17,17 +17,8 @@
         <label for="descricao-pasta">Descrição</label>
         <textarea id="descricao-pasta" name="descricao" rows="3">{{ descricao or '' }}</textarea>
     </div>
-    <div class="form-group">
-        <label for="parent-id">Pasta Superior</label>
-        <select id="parent-id" name="parent_id">
-            <option value="">Raiz (sem pasta superior)</option>
-            {% for pasta_opcao in pastas %}
-            <option value="{{ pasta_opcao.id }}" {% if parent_id|string == pasta_opcao.id|string %}selected{% endif %}>{{ pasta_opcao.caminho }}</option>
-            {% endfor %}
-        </select>
-    </div>
     <div class="form-actions">
-        <a href="{% if parent_id %}/pasta/{{ parent_id }}{% else %}/{% endif %}" class="btn-cancel">Cancelar</a>
+        <a href="/" class="btn-cancel">Cancelar</a>
         <button type="submit" class="btn-primary"><i class="ph ph-folder-plus"></i> Criar Pasta</button>
     </div>
 </form>

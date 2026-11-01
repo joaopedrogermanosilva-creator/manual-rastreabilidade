@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=6">
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -28,8 +28,18 @@
             <li><a href="/"><i class="ph ph-house"></i> Início</a></li>
             {% macro render_pastas_menu(pastas) %}
             {% for pasta in pastas %}
-            <li>
+            <li class="sidebar-folder-item">
                 <a class="sidebar-folder-link" href="/pasta/{{ pasta.id }}"><i class="ph ph-folder"></i> {{ pasta.nome }}</a>
+                <details class="folder-menu folder-menu-sidebar">
+                    <summary aria-label="Opções da pasta {{ pasta.nome }}" title="Opções da pasta">
+                        <i class="ph ph-dots-three-vertical" aria-hidden="true"></i>
+                    </summary>
+                    <div class="folder-menu-dropdown">
+                        <form action="/pastas/{{ pasta.id }}/excluir" method="POST" data-confirmation data-confirm-message="Excluir a pasta {{ pasta.nome }}? Só é possível excluir pastas sem subpastas ou procedimentos.">
+                            <button type="submit" class="folder-menu-delete"><i class="ph ph-trash" aria-hidden="true"></i> Excluir Pasta</button>
+                        </form>
+                    </div>
+                </details>
                 {% if pasta.subpastas %}
                 <ul class="sidebar-list sidebar-sublist">{{ render_pastas_menu(pasta.subpastas) }}</ul>
                 {% endif %}
@@ -39,7 +49,7 @@
             {{ render_pastas_menu(menu_pastas) }}
         </ul>
         <div class="sidebar-footer">
-            <a href="/tarefa/novo" class="btn-primary">+ Novo Procedimento</a>
+            <a href="/pastas/nova" class="btn-primary"><i class="ph ph-folder-plus"></i> Nova Pasta</a>
         </div>
     </aside>
 

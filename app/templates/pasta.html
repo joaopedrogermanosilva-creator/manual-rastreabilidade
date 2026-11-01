@@ -18,9 +18,6 @@
     <h1>{% if pasta %}{{ pasta.nome }}{% else %}Pastas{% endif %}<span class="accent">.</span></h1>
     {% if pasta and pasta.descricao %}<p class="subtitle">{{ pasta.descricao }}</p>{% endif %}
     <div class="folder-actions">
-        <a class="btn-primary" href="/pastas/nova{% if pasta %}?parent_id={{ pasta.id }}{% endif %}">
-            <i class="ph ph-folder-plus"></i> Nova Pasta
-        </a>
         {% if pasta %}
         <a class="btn-primary" href="/tarefa/novo?pasta_id={{ pasta.id }}">
             <i class="ph ph-plus-circle"></i> Novo Procedimento nesta Pasta
@@ -44,11 +41,16 @@
                 <h3>{{ subpasta.nome }}</h3>
                 <p>{{ subpasta.descricao or "Abrir pasta" }}</p>
             </a>
-            <form action="/pastas/{{ subpasta.id }}/excluir" method="POST" data-confirmation data-confirm-message="Excluir a pasta {{ subpasta.nome }}? Somente pastas vazias podem ser excluídas.">
-                <button type="submit" class="btn-folder-delete" aria-label="Excluir pasta {{ subpasta.nome }}" title="Excluir pasta">
-                    <i class="ph ph-trash" aria-hidden="true"></i><span>Excluir</span>
-                </button>
-            </form>
+            <details class="folder-menu folder-menu-card">
+                <summary aria-label="Opções da pasta {{ subpasta.nome }}" title="Opções da pasta">
+                    <i class="ph ph-dots-three-vertical" aria-hidden="true"></i>
+                </summary>
+                <div class="folder-menu-dropdown">
+                    <form action="/pastas/{{ subpasta.id }}/excluir" method="POST" data-confirmation data-confirm-message="Excluir a pasta {{ subpasta.nome }}? Só é possível excluir pastas sem subpastas ou procedimentos.">
+                        <button type="submit" class="folder-menu-delete"><i class="ph ph-trash" aria-hidden="true"></i> Excluir Pasta</button>
+                    </form>
+                </div>
+            </details>
         </article>
         {% endfor %}
     </div>

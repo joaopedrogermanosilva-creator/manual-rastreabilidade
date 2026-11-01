@@ -151,11 +151,7 @@ def home(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={
-            "categorias": get_categorias(),
-            "pastas_raiz": listar_pastas(),
-            "erro": request.query_params.get("erro"),
-        },
+        context={"categorias": get_categorias()},
     )
 
 @router.get("/categoria/{slug}", response_class=HTMLResponse)
@@ -178,16 +174,12 @@ def pastas_legado():
 
 
 @router.get("/pastas/nova", response_class=HTMLResponse)
-def form_nova_pasta(request: Request, parent_id: UUID | None = None):
-    if parent_id and not buscar_pasta(parent_id):
-        raise HTTPException(404, "A pasta superior informada não existe.")
+def form_nova_pasta(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="form_pasta.html",
         context={
             "categorias": get_categorias(),
-            "pastas": listar_opcoes_pasta(),
-            "parent_id": str(parent_id) if parent_id else "",
             "erro": None,
         },
     )
@@ -198,7 +190,6 @@ def salvar_nova_pasta(
     request: Request,
     nome: Annotated[str, Form()],
     descricao: Annotated[str, Form()] = "",
-    parent_id: Annotated[str, Form()] = "",
 ):
     nome = nome.strip()
     if not nome:
@@ -207,8 +198,6 @@ def salvar_nova_pasta(
             name="form_pasta.html",
             context={
                 "categorias": get_categorias(),
-                "pastas": listar_opcoes_pasta(),
-                "parent_id": parent_id,
                 "nome": nome,
                 "descricao": descricao,
                 "erro": "Informe um nome para a pasta.",
@@ -216,12 +205,10 @@ def salvar_nova_pasta(
             status_code=422,
         )
 
-    parent_id_validado = _validar_pasta_id(parent_id)
-    pasta_criada = criar_pasta(nome, descricao, parent_id_validado)
+    pasta_criada = criar_pasta(nome, descricao)
     if not pasta_criada or not pasta_criada.get("id"):
         raise HTTPException(500, "Não foi possível confirmar a criação da pasta.")
-    destino = f"/pasta/{parent_id_validado}" if parent_id_validado else "/"
-    return RedirectResponse(destino, 303)
+    return RedirectResponse("/", 303)
 
 
 @router.post("/pastas/{pasta_id}/excluir")
@@ -232,7 +219,7 @@ def excluir_pasta_rota(pasta_id: UUID):
 
     destino = f"/pasta/{pasta_atual['parent_id']}" if pasta_atual.get("parent_id") else "/"
     if not excluir_pasta(pasta_id):
-        return RedirectResponse(f"{destino}?erro=pasta_nao_vazia", 303)
+        return RedirectResponse(f"/pasta/{pasta_id}?erro=pasta_nao_vazia", 303)
     return RedirectResponse(destino, 303)
 
 
