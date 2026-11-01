@@ -18,7 +18,7 @@
     <h1>{% if pasta %}{{ pasta.nome }}{% else %}Pastas{% endif %}<span class="accent">.</span></h1>
     {% if pasta and pasta.descricao %}<p class="subtitle">{{ pasta.descricao }}</p>{% endif %}
     <div class="folder-actions">
-        {% if pasta %}
+        {% if pasta and is_admin %}
         <a class="btn-primary" href="/tarefa/novo?pasta_id={{ pasta.id }}">
             <i class="ph ph-plus-circle"></i> Novo Procedimento nesta Pasta
         </a>
@@ -41,6 +41,7 @@
                 <h3>{{ subpasta.nome }}</h3>
                 <p>{{ subpasta.descricao or "Abrir pasta" }}</p>
             </a>
+            {% if is_admin %}
             <details class="folder-menu folder-menu-card">
                 <summary aria-label="Opções da pasta {{ subpasta.nome }}" title="Opções da pasta">
                     <i class="ph ph-dots-three-vertical" aria-hidden="true"></i>
@@ -51,6 +52,7 @@
                     </form>
                 </div>
             </details>
+            {% endif %}
         </article>
         {% endfor %}
     </div>

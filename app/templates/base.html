@@ -30,6 +30,7 @@
             {% for pasta in pastas %}
             <li class="sidebar-folder-item">
                 <a class="sidebar-folder-link" href="/pasta/{{ pasta.id }}"><i class="ph ph-folder"></i> {{ pasta.nome }}</a>
+                {% if is_admin %}
                 <details class="folder-menu folder-menu-sidebar">
                     <summary aria-label="Opções da pasta {{ pasta.nome }}" title="Opções da pasta">
                         <i class="ph ph-dots-three-vertical" aria-hidden="true"></i>
@@ -40,6 +41,7 @@
                         </form>
                     </div>
                 </details>
+                {% endif %}
                 {% if pasta.subpastas %}
                 <ul class="sidebar-list sidebar-sublist">{{ render_pastas_menu(pasta.subpastas) }}</ul>
                 {% endif %}
@@ -49,8 +51,12 @@
             {{ render_pastas_menu(menu_pastas) }}
         </ul>
         <div class="sidebar-footer">
+            {% if is_admin %}
             <a href="/pastas/nova" class="btn-primary"><i class="ph ph-folder-plus"></i> Nova Pasta</a>
             <a href="/logout" class="sidebar-logout"><i class="ph ph-sign-out"></i> Sair</a>
+            {% else %}
+            <a href="/login" class="btn-primary"><i class="ph ph-lock-key"></i> Login Admin</a>
+            {% endif %}
         </div>
     </aside>
 

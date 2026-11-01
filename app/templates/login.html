@@ -14,21 +14,17 @@
             <div class="login-brand">
                 <span class="login-brand-mark" aria-hidden="true"><i class="ph ph-crosshair"></i></span>
                 <h1 id="login-title">RASTREABILIDADE</h1>
-                <p>Entre para acessar a Central de Consulta</p>
+                <p>Acesso restrito às funções administrativas</p>
             </div>
             <form class="login-form" action="/login" method="POST">
                 {% if erro %}
                 <p class="login-error" role="alert">{{ erro }}</p>
                 {% endif %}
-                <label for="login-email">
-                    E-mail
-                    <input id="login-email" type="email" name="email" autocomplete="username" required autofocus>
-                </label>
                 <label for="login-senha">
-                    Senha
-                    <input id="login-senha" type="password" name="senha" autocomplete="current-password" required>
+                    Senha de Administrador
+                    <input id="login-senha" type="password" name="senha" autocomplete="current-password" required autofocus>
                 </label>
-                <button type="submit" class="btn-primary"><i class="ph ph-sign-in"></i> Entrar</button>
+                <button type="submit" class="btn-primary"><i class="ph ph-lock-key"></i> Entrar como Admin</button>
             </form>
         </section>
     </main>

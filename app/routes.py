@@ -1,16 +1,8 @@
-import logging
-import httpx
+import hmac
+import os
 from fastapi import APIRouter, Depends, HTTPException, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from supabase import create_client
-from supabase.lib.client_options import SyncClientOptions
-from supabase_auth.errors import (
-    AuthApiError,
-    AuthError,
-    AuthInvalidCredentialsError,
-    AuthRetryableError,
-)
 from typing import Annotated
 from uuid import UUID
 import mimetypes
@@ -44,16 +36,15 @@ from app.dados_pastas import (
     obter_breadcrumb,
 )
 
-logger = logging.getLogger(__name__)
 auth_router = APIRouter()
 
 
-def verificar_login(request: Request):
-    if not request.session.get("usuario_id"):
+def verificar_admin(request: Request):
+    if request.session.get("is_admin") is not True:
         raise HTTPException(status_code=303, headers={"Location": "/login"})
 
 
-router = APIRouter(dependencies=[Depends(verificar_login)])
+router = APIRouter()
 CATEGORIA_PASTA_ALIASES = {
     "escala": {"escala-de-abate"},
     "escala-de-abate": {"escala"},
@@ -101,7 +92,10 @@ def get_menu_completo():
 
 
 def _menu_context(request: Request):
-    return {"menu_pastas": get_menu_completo()}
+    return {
+        "menu_pastas": get_menu_completo(),
+        "is_admin": request.session.get("is_admin") is True,
+    }
 
 
 def _buscar_pasta_da_categoria(slug: str, categoria: dict | None = None):
@@ -169,7 +163,7 @@ EXTENSOES_ANEXOS_PERMITIDAS = {
 
 @auth_router.get("/login", response_class=HTMLResponse)
 def login(request: Request):
-    if request.session.get("usuario_id"):
+    if request.session.get("is_admin") is True:
         return RedirectResponse("/", 303)
     return login_templates.TemplateResponse(
         request=request,
@@ -179,79 +173,27 @@ def login(request: Request):
 
 
 @auth_router.post("/login", response_class=HTMLResponse)
-def autenticar(
-    request: Request,
-    email: Annotated[str, Form()],
-    senha: Annotated[str, Form()],
-):
-    auth_client = create_client(
-        supabase.supabase_url,
-        supabase.supabase_key,
-        options=SyncClientOptions(auto_refresh_token=False, persist_session=False),
-    )
-    try:
-        response = auth_client.auth.sign_in_with_password(
-            {"email": email.strip(), "password": senha}
-        )
-    except AuthInvalidCredentialsError:
+def autenticar(request: Request, senha: Annotated[str, Form()]):
+    senha_admin = os.getenv("ADMIN_PASSWORD") or "admin123"
+    senha_enviada = senha.encode("utf-8")
+    senha_configurada = senha_admin.encode("utf-8")
+    if not hmac.compare_digest(senha_enviada, senha_configurada):
         return login_templates.TemplateResponse(
             request=request,
             name="login.html",
-            context={"erro": "E-mail ou senha inválidos."},
+            context={"erro": "Senha de administrador inválida."},
             status_code=401,
-        )
-    except AuthApiError as exc:
-        if exc.code == "invalid_credentials":
-            return login_templates.TemplateResponse(
-                request=request,
-                name="login.html",
-                context={"erro": "E-mail ou senha inválidos."},
-                status_code=401,
-            )
-        logger.exception("Falha na resposta do Supabase Auth.")
-        return login_templates.TemplateResponse(
-            request=request,
-            name="login.html",
-            context={"erro": "Não foi possível autenticar agora. Tente novamente."},
-            status_code=503,
-        )
-    except (AuthRetryableError, httpx.HTTPError):
-        logger.exception("Falha de comunicação com o Supabase Auth.")
-        return login_templates.TemplateResponse(
-            request=request,
-            name="login.html",
-            context={"erro": "Não foi possível autenticar agora. Tente novamente."},
-            status_code=503,
-        )
-    except AuthError:
-        logger.exception("Erro inesperado no Supabase Auth.")
-        return login_templates.TemplateResponse(
-            request=request,
-            name="login.html",
-            context={"erro": "Não foi possível autenticar agora. Tente novamente."},
-            status_code=503,
-        )
-    finally:
-        auth_client.auth.close()
-
-    if not response.user or not response.user.id:
-        logger.error("Supabase Auth retornou sucesso sem identificador de usuário.")
-        return login_templates.TemplateResponse(
-            request=request,
-            name="login.html",
-            context={"erro": "Não foi possível validar esta conta."},
-            status_code=503,
         )
 
     request.session.clear()
-    request.session["usuario_id"] = str(response.user.id)
+    request.session["is_admin"] = True
     return RedirectResponse("/", 303)
 
 
-@auth_router.get("/logout", dependencies=[Depends(verificar_login)])
+@auth_router.get("/logout")
 def logout(request: Request):
     request.session.clear()
-    return RedirectResponse("/login", 303)
+    return RedirectResponse("/", 303)
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -281,7 +223,11 @@ def pastas_legado():
     return RedirectResponse("/", 307)
 
 
-@router.get("/pastas/nova", response_class=HTMLResponse)
+@router.get(
+    "/pastas/nova",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verificar_admin)],
+)
 def form_nova_pasta(request: Request):
     return templates.TemplateResponse(
         request=request,
@@ -293,7 +239,11 @@ def form_nova_pasta(request: Request):
     )
 
 
-@router.post("/pastas/nova", response_class=HTMLResponse)
+@router.post(
+    "/pastas/nova",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verificar_admin)],
+)
 def salvar_nova_pasta(
     request: Request,
     nome: Annotated[str, Form()],
@@ -319,7 +269,10 @@ def salvar_nova_pasta(
     return RedirectResponse("/", 303)
 
 
-@router.post("/pastas/{pasta_id}/excluir")
+@router.post(
+    "/pastas/{pasta_id}/excluir",
+    dependencies=[Depends(verificar_admin)],
+)
 def excluir_pasta_rota(pasta_id: UUID):
     pasta_atual = buscar_pasta(pasta_id)
     if not pasta_atual:
@@ -362,7 +315,11 @@ def pasta(pasta_id: UUID, request: Request):
         },
     )
 
-@router.get("/tarefa/novo", response_class=HTMLResponse)
+@router.get(
+    "/tarefa/novo",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verificar_admin)],
+)
 def form_novo(request: Request, pasta_id: UUID | None = None):
     pasta_atual = buscar_pasta(pasta_id) if pasta_id else None
     if pasta_id and not pasta_atual:
@@ -379,7 +336,7 @@ def form_novo(request: Request, pasta_id: UUID | None = None):
         },
     )
 
-@router.post("/tarefa/novo")
+@router.post("/tarefa/novo", dependencies=[Depends(verificar_admin)])
 def salvar_novo(titulo: Annotated[str, Form()], categoria: Annotated[str, Form()], resumo: Annotated[str, Form()], objetivo: Annotated[str, Form()], como_realizar: Annotated[str, Form()], pontos_atencao: Annotated[str, Form()] = "", pasta_id: Annotated[str | None, Form()] = None, arquivo: UploadFile | None = File(None), arquivos: list[UploadFile] | None = File(None)):
     pasta_id_validado = _validar_pasta_id(pasta_id)
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
@@ -402,7 +359,11 @@ def salvar_novo(titulo: Annotated[str, Form()], categoria: Annotated[str, Form()
         return RedirectResponse(f"/pasta/{pasta_id_validado}", 303)
     return RedirectResponse(f"/categoria/{categoria}", 303)
 
-@router.get("/tarefa/{proc_id}/editar", response_class=HTMLResponse)
+@router.get(
+    "/tarefa/{proc_id}/editar",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verificar_admin)],
+)
 def form_editar(proc_id: int, request: Request):
     proc = buscar_procedimento(proc_id)
     if not proc: raise HTTPException(404)
@@ -428,7 +389,10 @@ def form_editar(proc_id: int, request: Request):
         },
     )
 
-@router.post("/tarefa/{proc_id}/editar")
+@router.post(
+    "/tarefa/{proc_id}/editar",
+    dependencies=[Depends(verificar_admin)],
+)
 def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annotated[str, Form()], resumo: Annotated[str, Form()], objetivo: Annotated[str, Form()], como_realizar: Annotated[str, Form()], pontos_atencao: Annotated[str, Form()] = "", pasta_id: Annotated[str | None, Form()] = None, arquivo: UploadFile | None = File(None), arquivos: list[UploadFile] | None = File(None)):
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
     arquivos_validados = _validar_anexos(arquivos_preenchidos)
@@ -454,7 +418,10 @@ def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annot
         _salvar_anexos(proc_id, arquivos_validados)
     return RedirectResponse(f"/tarefa/{proc_id}", 303)
 
-@router.post("/tarefa/{proc_id}/anexo/{anexo_id}/excluir")
+@router.post(
+    "/tarefa/{proc_id}/anexo/{anexo_id}/excluir",
+    dependencies=[Depends(verificar_admin)],
+)
 def excluir_anexo_rota(proc_id: int, anexo_id: UUID):
     anexo = buscar_anexo(anexo_id)
     if not anexo or anexo.get("procedimento_id") != proc_id:
@@ -474,7 +441,10 @@ def excluir_anexo_rota(proc_id: int, anexo_id: UUID):
         raise HTTPException(500, "O arquivo foi removido do Storage, mas o registro do anexo não foi removido.")
     return RedirectResponse(f"/tarefa/{proc_id}/editar", 303)
 
-@router.post("/tarefa/{proc_id}/foto-legada/excluir")
+@router.post(
+    "/tarefa/{proc_id}/foto-legada/excluir",
+    dependencies=[Depends(verificar_admin)],
+)
 def excluir_foto_legada_rota(proc_id: int):
     proc = buscar_procedimento(proc_id)
     if not proc:
@@ -494,7 +464,10 @@ def excluir_foto_legada_rota(proc_id: int):
         raise HTTPException(500, "A foto foi removida do Storage, mas não foi possível limpar o vínculo no procedimento.")
     return RedirectResponse(f"/tarefa/{proc_id}/editar", 303)
 
-@router.post("/tarefa/{proc_id}/excluir")
+@router.post(
+    "/tarefa/{proc_id}/excluir",
+    dependencies=[Depends(verificar_admin)],
+)
 def excluir(proc_id: int):
     proc = buscar_procedimento(proc_id)
     if proc:
