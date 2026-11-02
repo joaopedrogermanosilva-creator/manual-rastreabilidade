@@ -51,4 +51,5 @@
 {% if anexos | selectattr('legacy') | list %}
 <form id="excluir-foto-legada" action="/tarefa/{{ proc.id }}/foto-legada/excluir" method="POST" data-confirmation data-confirm-message="Excluir a foto legada deste procedimento?"></form>
 {% endif %}
+<script src="/static/js/upload-validation.js"></script>
 {% endblock %}
