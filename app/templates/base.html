@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=8">
+    <link rel="stylesheet" href="/static/css/style.css?v=9">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -36,6 +36,7 @@
                         <i class="ph ph-dots-three-vertical" aria-hidden="true"></i>
                     </summary>
                     <div class="folder-menu-dropdown">
+                        <a class="folder-menu-edit" href="/pastas/{{ pasta.id }}/editar"><i class="ph ph-pencil-simple" aria-hidden="true"></i> Editar Pasta</a>
                         <form action="/pastas/{{ pasta.id }}/excluir" method="POST" data-confirmation data-confirm-message="Excluir a pasta {{ pasta.nome }}? Só é possível excluir pastas sem subpastas ou procedimentos.">
                             <button type="submit" class="folder-menu-delete"><i class="ph ph-trash" aria-hidden="true"></i> Excluir Pasta</button>
                         </form>

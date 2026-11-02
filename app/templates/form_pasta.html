@@ -1,14 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Nova Pasta — Manual de Rastreabilidade{% endblock %}
+{% block title %}{% if editar %}Editar Pasta{% else %}Nova Pasta{% endif %} — Manual de Rastreabilidade{% endblock %}
 {% block content %}
 <section class="hero">
+    {% if pasta and pasta.parent_id %}
+    <a href="/pasta/{{ pasta.parent_id }}" class="back-link"><i class="ph ph-arrow-left"></i> Voltar à pasta superior</a>
+    {% else %}
     <a href="/" class="back-link"><i class="ph ph-arrow-left"></i> Voltar à página inicial</a>
-    <h1>Nova Pasta<span class="accent">.</span></h1>
+    {% endif %}
+    <h1>{% if editar %}Editar Pasta{% else %}Nova Pasta{% endif %}<span class="accent">.</span></h1>
 </section>
 {% if erro %}
 <p class="folder-alert" role="alert">{{ erro }}</p>
 {% endif %}
-<form action="/pastas/nova" method="POST" class="form-manual">
+<form action="{% if editar %}/pastas/{{ pasta.id }}/editar{% else %}/pastas/nova{% endif %}" method="POST" class="form-manual">
     <div class="form-group">
         <label for="nome-pasta">Nome da Pasta</label>
         <input id="nome-pasta" type="text" name="nome" required maxlength="120" value="{{ nome or '' }}">
@@ -19,7 +23,10 @@
     </div>
     <div class="form-actions">
         <a href="/" class="btn-cancel">Cancelar</a>
-        <button type="submit" class="btn-primary"><i class="ph ph-folder-plus"></i> Criar Pasta</button>
+        <button type="submit" class="btn-primary">
+            <i class="ph {% if editar %}ph-floppy-disk{% else %}ph-folder-plus{% endif %}"></i>
+            {% if editar %}Salvar Alterações{% else %}Criar Pasta{% endif %}
+        </button>
     </div>
 </form>
 {% endblock %}

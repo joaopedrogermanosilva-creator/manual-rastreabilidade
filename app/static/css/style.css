@@ -351,6 +351,23 @@ body {
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
 }
 .folder-menu-dropdown form { margin: 0; }
+.folder-menu-edit {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 9px 11px;
+    color: var(--text-dim);
+    border-radius: 5px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.folder-menu-edit:hover,
+.folder-menu-edit:focus-visible {
+    color: var(--text);
+    background: var(--accent-soft);
+    outline: none;
+}
 .folder-menu-delete {
     display: flex;
     align-items: center;
@@ -542,6 +559,40 @@ body {
     border: 1px solid rgba(248, 113, 113, 0.55);
     border-radius: 8px;
 }
+.success-toast {
+    position: fixed;
+    top: 82px;
+    right: 20px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: calc(100vw - 32px);
+    padding: 14px 16px;
+    color: #bbf7d0;
+    background: var(--bg-elev);
+    border: 1px solid rgba(74, 222, 128, 0.55);
+    border-left: 4px solid #4ade80;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    animation: success-toast-in 0.2s ease-out;
+}
+.success-toast.is-hiding { opacity: 0; transform: translateY(-6px); transition: opacity 0.25s, transform 0.25s; }
+.success-toast-close {
+    flex: 0 0 auto;
+    padding: 0 2px;
+    color: var(--text-dim);
+    background: transparent;
+    border: 0;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+.success-toast-close:hover { color: var(--text); }
+@keyframes success-toast-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 /* ===== RESPONSIVO PARA CELULAR ===== */
 @media (max-width: 600px) {
@@ -550,6 +601,7 @@ body {
     .folder-breadcrumb { gap: 6px; font-size: 13px; }
     .folder-actions { flex-direction: column; align-items: stretch; }
     .folder-actions .btn-primary { justify-content: center; }
+    .success-toast { top: 72px; right: 12px; left: 12px; max-width: none; justify-content: space-between; }
     .confirm-dialog-content { padding: 24px 18px; }
     .confirm-dialog-actions { flex-direction: column-reverse; }
     .confirm-dialog-actions .btn-cancel,

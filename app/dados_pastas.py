@@ -142,6 +142,7 @@ def atualizar_pasta(
         supabase.table("pastas")
         .update(dados)
         .eq("id", str(pasta_id))
+        .select("*")
         .execute()
     )
     return response.data[0] if response.data else None

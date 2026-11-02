@@ -27,6 +27,7 @@ from app.dados import (
     remover_foto_legada,
 )
 from app.dados_pastas import (
+    atualizar_pasta,
     buscar_pasta,
     criar_pasta,
     excluir_pasta,
@@ -271,6 +272,69 @@ def salvar_nova_pasta(
     return RedirectResponse("/", 303)
 
 
+@router.get(
+    "/pastas/{pasta_id}/editar",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verificar_admin)],
+)
+def form_editar_pasta(pasta_id: UUID, request: Request):
+    pasta_atual = buscar_pasta(pasta_id)
+    if not pasta_atual:
+        raise HTTPException(404, "Pasta não encontrada.")
+    return templates.TemplateResponse(
+        request=request,
+        name="form_pasta.html",
+        context={
+            "categorias": get_categorias(),
+            "pasta": pasta_atual,
+            "nome": pasta_atual["nome"],
+            "descricao": pasta_atual.get("descricao") or "",
+            "editar": True,
+            "erro": None,
+        },
+    )
+
+
+@router.post(
+    "/pastas/{pasta_id}/editar",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verificar_admin)],
+)
+def salvar_edicao_pasta(
+    pasta_id: UUID,
+    request: Request,
+    nome: Annotated[str, Form()],
+    descricao: Annotated[str, Form()] = "",
+):
+    pasta_atual = buscar_pasta(pasta_id)
+    if not pasta_atual:
+        raise HTTPException(404, "Pasta não encontrada.")
+
+    nome = nome.strip()
+    if not nome:
+        return templates.TemplateResponse(
+            request=request,
+            name="form_pasta.html",
+            context={
+                "categorias": get_categorias(),
+                "pasta": pasta_atual,
+                "nome": nome,
+                "descricao": descricao,
+                "editar": True,
+                "erro": "Informe um nome para a pasta.",
+            },
+            status_code=422,
+        )
+
+    pasta_atualizada = atualizar_pasta(pasta_id, nome, descricao)
+    if not pasta_atualizada:
+        raise HTTPException(500, "Não foi possível confirmar a atualização da pasta.")
+
+    parent_id = pasta_atualizada.get("parent_id")
+    destino = f"/pasta/{parent_id}" if parent_id else "/"
+    return RedirectResponse(destino, 303)
+
+
 @router.post(
     "/pastas/{pasta_id}/excluir",
     dependencies=[Depends(verificar_admin)],
@@ -435,7 +499,10 @@ def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annot
     atualizar_procedimento(proc_id, {"categoria": categoria, "titulo": titulo, "resumo": resumo, "objetivo": objetivo, "como_realizar": passos, "pontos_atencao": pontos, "arquivo_url": url, "pasta_id": pasta_id_validado})
     if arquivos_validados:
         _salvar_anexos(proc_id, arquivos_validados)
-    return RedirectResponse(f"/tarefa/{proc_id}", 303)
+    return RedirectResponse(
+        url=f"/tarefa/{proc_id}?sucesso=1",
+        status_code=303,
+    )
 
 @router.post(
     "/tarefa/{proc_id}/anexo/{anexo_id}/excluir",
@@ -522,6 +589,7 @@ def tarefa(proc_id: int, request: Request):
             "pasta": pasta_atual,
             "categorias": cats,
             "anexos": anexos,
+            "sucesso": request.query_params.get("sucesso") == "1",
         },
     )
 

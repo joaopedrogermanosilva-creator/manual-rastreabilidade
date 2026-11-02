@@ -2,6 +2,24 @@
 {% block title %}{{ proc.titulo }} &mdash; Manual de Rastreabilidade{% endblock %}
 
 {% block content %}
+{% if sucesso %}
+<div class="success-toast" role="status" aria-live="polite">
+    <span>✅ Alterações salvas com sucesso!</span>
+    <button type="button" class="success-toast-close" aria-label="Fechar aviso">&times;</button>
+</div>
+<script>
+    (() => {
+        const toast = document.querySelector(".success-toast");
+        const closeButton = toast.querySelector(".success-toast-close");
+        const dismiss = () => {
+            toast.classList.add("is-hiding");
+            window.setTimeout(() => toast.remove(), 250);
+        };
+        closeButton.addEventListener("click", dismiss);
+        window.setTimeout(dismiss, 3000);
+    })();
+</script>
+{% endif %}
 <section class="hero">
     {% if pasta %}
     <a href="/pasta/{{ pasta.id }}" class="back-link"><i class="ph ph-arrow-left"></i> Voltar para {{ pasta.nome }}</a>
