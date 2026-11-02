@@ -57,7 +57,15 @@
         <div class="anexos-grid">
             {% for anexo in anexos %}
             <article class="arquivo-card">
-                {% if anexo.is_image %}
+                {% if anexo.is_video %}
+                    <i class="ph ph-video-camera anexo-file-icon" aria-hidden="true"></i>
+                    <span class="card-tag">Vídeo</span>
+                    <h3>{{ anexo.nome_original }}</h3>
+                    <video controls style="max-width: 100%; border-radius: 8px; margin-top: 10px;">
+                        <source src="{{ anexo.arquivo_url }}" type="{{ anexo.tipo }}">
+                        Seu navegador não suporta vídeos.
+                    </video>
+                {% elif anexo.is_image %}
                     <a href="{{ anexo.arquivo_url }}" target="_blank" rel="noopener noreferrer">
                         <img src="{{ anexo.arquivo_url }}" alt="{{ anexo.nome_original }}" class="anexo-preview">
                     </a>

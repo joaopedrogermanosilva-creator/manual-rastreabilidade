@@ -142,6 +142,16 @@ EXTENSOES_ANEXOS_PERMITIDAS = {
     ".pptx",
     ".xls",
     ".xlsx",
+    ".mp4",
+    ".mov",
+    ".avi",
+    ".webm",
+}
+TIPOS_VIDEO_PERMITIDOS = {
+    "video/mp4",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/webm",
 }
 
 
@@ -617,11 +627,19 @@ def _preparar_anexo_para_exibicao(anexo: dict):
     nome = anexo.get("nome_original") or "Arquivo"
     tipo = (anexo.get("tipo") or mimetypes.guess_type(nome)[0] or "").lower()
     extensao = nome.rsplit(".", 1)[-1].lower() if "." in nome else ""
+    is_video = (
+        tipo in TIPOS_VIDEO_PERMITIDOS
+        or tipo.startswith("video/")
+        or extensao in {"mp4", "mov", "avi", "webm"}
+    )
     is_image = tipo.startswith("image/") or tipo == "image" or extensao in {
         "png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "avif", "heic",
         "heif", "tif", "tiff", "jpe", "jfif", "ico", "jxl",
     }
-    if is_image:
+    if is_video:
+        icone = "ph-video-camera"
+        categoria_arquivo = "Vídeo"
+    elif is_image:
         icone = "ph-image"
         categoria_arquivo = "Imagem"
     elif extensao == "pdf" or tipo in {"application/pdf", "pdf"}:
@@ -642,6 +660,7 @@ def _preparar_anexo_para_exibicao(anexo: dict):
     return {
         **anexo,
         "nome_original": nome,
+        "is_video": is_video,
         "is_image": is_image,
         "icone": icone,
         "categoria_arquivo": categoria_arquivo,

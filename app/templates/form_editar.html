@@ -15,7 +15,7 @@
     <div class="form-group"><label>Pontos de atenção</label><textarea name="pontos_atencao" rows="3">{{ proc.pontos_atencao | join('
 ') }}</textarea></div>
     <div class="form-group">
-        <label>Anexar Arquivos (Fotos, PDFs, Documentos)</label>
+        <label>Anexar Arquivos (Fotos, Vídeos, PDFs, Documentos)</label>
         {% if anexos %}
         <div class="editar-anexos-lista" aria-label="Anexos existentes">
             {% for anexo in anexos %}
@@ -39,7 +39,7 @@
             {% endfor %}
         </div>
         {% endif %}
-        <input type="file" name="arquivos" multiple accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
+        <input type="file" name="arquivos" multiple accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx,video/*">
     </div>
     <div class="form-actions"><a href="/tarefa/{{ proc.id }}" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar</button></div>
 </form>
