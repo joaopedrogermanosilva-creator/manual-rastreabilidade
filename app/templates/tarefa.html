@@ -3,22 +3,8 @@
 
 {% block content %}
 {% if sucesso %}
-<div class="success-toast" role="status" aria-live="polite">
-    <span>✅ Alterações salvas com sucesso!</span>
-    <button type="button" class="success-toast-close" aria-label="Fechar aviso">&times;</button>
-</div>
-<script>
-    (() => {
-        const toast = document.querySelector(".success-toast");
-        const closeButton = toast.querySelector(".success-toast-close");
-        const dismiss = () => {
-            toast.classList.add("is-hiding");
-            window.setTimeout(() => toast.remove(), 250);
-        };
-        closeButton.addEventListener("click", dismiss);
-        window.setTimeout(dismiss, 3000);
-    })();
-</script>
+{% set toast_message = "✅ Alterações salvas com sucesso!" %}
+{% include "toast_sucesso.html" %}
 {% endif %}
 <section class="hero">
     {% if pasta %}

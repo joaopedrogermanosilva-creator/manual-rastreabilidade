@@ -113,25 +113,6 @@ def _buscar_pasta_da_categoria(slug: str, categoria: dict | None = None):
     )
 
 
-def _categoria_da_pasta(pasta: dict, categorias: dict):
-    chaves = _chaves_categoria(pasta["nome"], pasta)
-    for slug, categoria in categorias.items():
-        if _slug_pasta(slug) in chaves or _slug_pasta(categoria["titulo"]) in chaves:
-            return slug
-    return ""
-
-
-def _categorias_da_pasta(pasta: dict, categorias: dict):
-    chaves_pasta = _chaves_categoria(pasta["nome"], pasta)
-    if pasta.get("parent_id"):
-        return []
-    return [
-        slug
-        for slug, categoria in categorias.items()
-        if chaves_pasta.intersection(_chaves_categoria(slug, categoria))
-    ]
-
-
 templates = Jinja2Templates(
     directory="app/templates",
     context_processors=[_menu_context],
@@ -204,7 +185,10 @@ def home(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"categorias": get_categorias()},
+        context={
+            "categorias": get_categorias(),
+            "sucesso_pasta": request.query_params.get("sucesso_pasta") == "1",
+        },
     )
 
 @router.get("/categoria/{slug}", response_class=HTMLResponse)
@@ -331,7 +315,11 @@ def salvar_edicao_pasta(
         raise HTTPException(500, "Não foi possível confirmar a atualização da pasta.")
 
     parent_id = pasta_atualizada.get("parent_id")
-    destino = f"/pasta/{parent_id}" if parent_id else "/"
+    destino = (
+        f"/pasta/{parent_id}?sucesso_pasta=1"
+        if parent_id
+        else "/?sucesso_pasta=1"
+    )
     return RedirectResponse(destino, 303)
 
 
@@ -355,29 +343,17 @@ def pasta(pasta_id: UUID, request: Request):
     pasta_atual = buscar_pasta(pasta_id)
     if not pasta_atual:
         raise HTTPException(404)
-    categorias = get_categorias()
     procedimentos = listar_procedimentos_da_pasta(pasta_id)
-    ids_procedimentos = {str(item["id"]) for item in procedimentos}
-    for categoria_slug in _categorias_da_pasta(pasta_atual, categorias):
-        for procedimento in get_procedimentos_por_categoria(categoria_slug):
-            procedimento_pasta_id = procedimento.get("pasta_id")
-            procedimento_id = str(procedimento["id"])
-            if (
-                not procedimento_pasta_id
-                and procedimento_id not in ids_procedimentos
-            ):
-                procedimentos.append(procedimento)
-                ids_procedimentos.add(procedimento_id)
     return templates.TemplateResponse(
         request=request,
         name="pasta.html",
         context={
-            "categorias": categorias,
             "pasta": pasta_atual,
             "breadcrumb": obter_breadcrumb(pasta_id),
             "subpastas": listar_pastas(pasta_id),
             "procedimentos": procedimentos,
             "erro": request.query_params.get("erro"),
+            "sucesso_pasta": request.query_params.get("sucesso_pasta") == "1",
         },
     )
 
@@ -390,20 +366,27 @@ def form_novo(request: Request, pasta_id: UUID | None = None):
     pasta_atual = buscar_pasta(pasta_id) if pasta_id else None
     if pasta_id and not pasta_atual:
         raise HTTPException(404, "A pasta selecionada não existe.")
-    categorias = get_categorias()
     return templates.TemplateResponse(
         request=request,
         name="form.html",
         context={
-            "categorias": categorias,
             "pastas": listar_opcoes_pasta(),
             "pasta_id_selecionada": str(pasta_id) if pasta_id else "",
-            "categoria_selecionada": _categoria_da_pasta(pasta_atual, categorias) if pasta_atual else "",
         },
     )
 
 @router.post("/tarefa/novo", dependencies=[Depends(verificar_admin)])
-def salvar_novo(titulo: Annotated[str, Form()], categoria: Annotated[str, Form()], resumo: Annotated[str, Form()], objetivo: Annotated[str, Form()], como_realizar: Annotated[str, Form()], pontos_atencao: Annotated[str, Form()] = "", pasta_id: Annotated[str | None, Form()] = None, arquivo: UploadFile | None = File(None), arquivos: list[UploadFile] | None = File(None)):
+def salvar_novo(
+    titulo: Annotated[str, Form()],
+    resumo: Annotated[str, Form()],
+    objetivo: Annotated[str, Form()],
+    como_realizar: Annotated[str, Form()],
+    pontos_atencao: Annotated[str, Form()] = "",
+    pasta_id: Annotated[str | None, Form()] = None,
+    arquivo: UploadFile | None = File(None),
+    arquivos: list[UploadFile] | None = File(None),
+    categoria: Annotated[str, Form()] = "operacoes",
+):
     pasta_id_validado = _validar_pasta_id(pasta_id)
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
     arquivos_validados = _validar_anexos(arquivos_preenchidos)
@@ -440,7 +423,7 @@ def salvar_novo(titulo: Annotated[str, Form()], categoria: Annotated[str, Form()
             ) from exc
     if pasta_id_validado:
         return RedirectResponse(f"/pasta/{pasta_id_validado}", 303)
-    return RedirectResponse(f"/categoria/{categoria}", 303)
+    return RedirectResponse("/", 303)
 
 @router.get(
     "/tarefa/{proc_id}/editar",
@@ -466,7 +449,6 @@ def form_editar(proc_id: int, request: Request):
         name="form_editar.html",
         context={
             "proc": proc,
-            "categorias": get_categorias(),
             "pastas": listar_opcoes_pasta(),
             "anexos": anexos,
         },
@@ -476,7 +458,18 @@ def form_editar(proc_id: int, request: Request):
     "/tarefa/{proc_id}/editar",
     dependencies=[Depends(verificar_admin)],
 )
-def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annotated[str, Form()], resumo: Annotated[str, Form()], objetivo: Annotated[str, Form()], como_realizar: Annotated[str, Form()], pontos_atencao: Annotated[str, Form()] = "", pasta_id: Annotated[str | None, Form()] = None, arquivo: UploadFile | None = File(None), arquivos: list[UploadFile] | None = File(None)):
+def salvar_edicao(
+    proc_id: int,
+    titulo: Annotated[str, Form()],
+    resumo: Annotated[str, Form()],
+    objetivo: Annotated[str, Form()],
+    como_realizar: Annotated[str, Form()],
+    pontos_atencao: Annotated[str, Form()] = "",
+    pasta_id: Annotated[str | None, Form()] = None,
+    arquivo: UploadFile | None = File(None),
+    arquivos: list[UploadFile] | None = File(None),
+    categoria: Annotated[str | None, Form()] = None,
+):
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
     arquivos_validados = _validar_anexos(arquivos_preenchidos)
     passos = [p.strip() for p in como_realizar.strip().split("\n") if p.strip()]
@@ -496,7 +489,7 @@ def salvar_edicao(proc_id: int, titulo: Annotated[str, Form()], categoria: Annot
             supabase.storage.from_("documentos").upload(path, arquivo.file.read(), {"upsert": "true"})
             url = supabase.storage.from_("documentos").get_public_url(path)
         except Exception as e: print(f"Erro Upload: {e}")
-    atualizar_procedimento(proc_id, {"categoria": categoria, "titulo": titulo, "resumo": resumo, "objetivo": objetivo, "como_realizar": passos, "pontos_atencao": pontos, "arquivo_url": url, "pasta_id": pasta_id_validado})
+    atualizar_procedimento(proc_id, {"categoria": categoria or proc_atual.get("categoria_slug") or "operacoes", "titulo": titulo, "resumo": resumo, "objetivo": objetivo, "como_realizar": passos, "pontos_atencao": pontos, "arquivo_url": url, "pasta_id": pasta_id_validado})
     if arquivos_validados:
         _salvar_anexos(proc_id, arquivos_validados)
     return RedirectResponse(

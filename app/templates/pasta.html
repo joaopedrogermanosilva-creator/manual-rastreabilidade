@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{% if pasta %}{{ pasta.nome }}{% else %}Pastas{% endif %} — Manual de Rastreabilidade{% endblock %}
 {% block content %}
+{% if sucesso_pasta %}
+{% set toast_message = "✅ Pasta atualizada com sucesso!" %}
+{% include "toast_sucesso.html" %}
+{% endif %}
 <section class="hero">
     <nav class="folder-breadcrumb" aria-label="Breadcrumb">
         <a href="/">Início</a>
