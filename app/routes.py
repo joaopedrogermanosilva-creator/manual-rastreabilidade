@@ -12,6 +12,7 @@ import unicodedata
 from urllib.parse import unquote, urlsplit
 from uuid import uuid4
 from supabase_client import supabase
+from storage3.utils import StorageException
 from app.dados import (
     adicionar_anexo,
     adicionar_procedimento,
@@ -397,6 +398,10 @@ def salvar_novo(
     arquivos: list[UploadFile] | None = File(None),
     categoria: Annotated[str, Form()] = "operacoes",
 ):
+    print(
+        f"DEBUG: POST recebido. Titulo={titulo}, Arquivos={len(arquivos) if arquivos else 0}",
+        flush=True,
+    )
     pasta_id_validado = _validar_pasta_id(pasta_id)
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
     arquivos_validados = _validar_anexos(arquivos_preenchidos)
@@ -614,7 +619,21 @@ def _salvar_anexos(proc_id: int, arquivos: list[tuple[UploadFile, str, str]]):
     for arquivo, nome_original, extensao in arquivos:
         path = f"procedimentos/{proc_id}/{uuid4().hex}{extensao}"
         tipo = arquivo.content_type or mimetypes.guess_type(nome_original)[0] or "application/octet-stream"
-        bucket.upload(path, arquivo.file.read(), {"content-type": tipo})
+        print(f"DEBUG: Lendo arquivo {arquivo.filename}...", flush=True)
+        conteudo = arquivo.file.read()
+        print(
+            f"DEBUG: Arquivo lido. Tamanho: {len(conteudo)} bytes. Enviando para o Supabase...",
+            flush=True,
+        )
+        try:
+            bucket.upload(path, conteudo, {"content-type": tipo})
+        except StorageException as exc:
+            print(
+                f"DEBUG: Erro do Supabase Storage ({type(exc).__name__}): {exc!r}",
+                flush=True,
+            )
+            raise
+        print("DEBUG: Upload do Supabase concluído com sucesso!", flush=True)
         arquivo_url = bucket.get_public_url(path)
         anexo = adicionar_anexo(proc_id, arquivo_url, tipo, nome_original)
         if not anexo:
