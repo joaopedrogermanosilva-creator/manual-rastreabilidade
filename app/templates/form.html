@@ -10,8 +10,8 @@
     <div class="form-group"><label>Pasta <small>(opcional)</small></label><select name="pasta_id"><option value="__none__">Sem pasta (raiz)</option>{% for pasta in pastas %}<option value="{{ pasta.id }}" {% if pasta_id_selecionada|string == pasta.id|string %}selected{% endif %}>{{ pasta.caminho }}</option>{% endfor %}</select></div>
     <div class="form-group"><label>Resumo Curto</label><input type="text" name="resumo" required></div>
     <div class="form-group"><label>Objetivo</label><textarea name="objetivo" rows="3" required></textarea></div>
-    <div class="form-group"><label>Como realizar (um passo por linha)</label><textarea name="como_realizar" rows="5" required></textarea></div>
-    <div class="form-group"><label>Pontos de atenção (um por linha)</label><textarea name="pontos_atencao" rows="3"></textarea></div>
+    <div class="form-group"><label>Como realizar (escreva livremente, use Enter para parágrafos ou tópicos)</label><textarea name="como_realizar" rows="5" required></textarea></div>
+    <div class="form-group"><label>Pontos de atenção (escreva livremente, use Enter para parágrafos ou tópicos)</label><textarea name="pontos_atencao" rows="3"></textarea></div>
     <div class="form-group"><label>Anexar Arquivos (Fotos, Vídeos, PDFs, Documentos)</label><input type="file" name="arquivos" multiple accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx,video/*"></div>
     <div class="form-actions"><a href="/" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar</button></div>
 </form>

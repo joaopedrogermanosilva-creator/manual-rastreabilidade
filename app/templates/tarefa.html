@@ -32,23 +32,12 @@
 
 <section class="bloco">
     <h2 class="section-title"><i class="ph ph-list-checks"></i> 2. Como realizar</h2>
-    <div class="passos-grid">
-        {% for passo in proc.como_realizar %}
-        <div class="passo-card">
-            <span class="passo-num">{{ loop.index }}</span>
-            <p>{{ passo }}</p>
-        </div>
-        {% endfor %}
-    </div>
+    <div class="texto-livre">{{ proc.como_realizar | join('\n') if proc.como_realizar is iterable and proc.como_realizar is not string else proc.como_realizar }}</div>
 </section>
 
 <section class="bloco">
     <h2 class="section-title"><i class="ph ph-warning-circle"></i> 3. Pontos de atenção</h2>
-    <ul class="atencao">
-        {% for ponto in proc.pontos_atencao %}
-        <li>{{ ponto }}</li>
-        {% endfor %}
-    </ul>
+    <div class="texto-livre">{{ proc.pontos_atencao | join('\n') if proc.pontos_atencao is iterable and proc.pontos_atencao is not string else proc.pontos_atencao }}</div>
 </section>
 
 <section class="bloco">

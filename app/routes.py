@@ -405,8 +405,10 @@ def salvar_novo(
     pasta_id_validado = _validar_pasta_id(pasta_id)
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
     arquivos_validados = _validar_anexos(arquivos_preenchidos)
-    passos = [p.strip() for p in como_realizar.strip().split("\n") if p.strip()]
-    pontos = [p.strip() for p in pontos_atencao.strip().split("\n") if p.strip()]
+    texto_passos = como_realizar.strip()
+    texto_pontos = pontos_atencao.strip()
+    passos = [texto_passos] if texto_passos else []
+    pontos = [texto_pontos] if texto_pontos else []
     url = None
     if arquivo and arquivo.filename:
         try:
@@ -487,8 +489,10 @@ def salvar_edicao(
 ):
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
     arquivos_validados = _validar_anexos(arquivos_preenchidos)
-    passos = [p.strip() for p in como_realizar.strip().split("\n") if p.strip()]
-    pontos = [p.strip() for p in pontos_atencao.strip().split("\n") if p.strip()]
+    texto_passos = como_realizar.strip()
+    texto_pontos = pontos_atencao.strip()
+    passos = [texto_passos] if texto_passos else []
+    pontos = [texto_pontos] if texto_pontos else []
     proc_atual = buscar_procedimento(proc_id)
     if not proc_atual:
         raise HTTPException(404)

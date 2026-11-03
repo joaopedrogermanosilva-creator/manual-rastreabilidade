@@ -10,10 +10,8 @@
     <div class="form-group"><label>Pasta <small>(opcional)</small></label><select name="pasta_id"><option value="__none__" {% if not proc.pasta_id %}selected{% endif %}>Sem pasta (raiz)</option>{% for pasta in pastas %}<option value="{{ pasta.id }}" {% if proc.pasta_id|string == pasta.id|string %}selected{% endif %}>{{ pasta.caminho }}</option>{% endfor %}</select></div>
     <div class="form-group"><label>Resumo Curto</label><input type="text" name="resumo" required value="{{ proc.resumo }}"></div>
     <div class="form-group"><label>Objetivo</label><textarea name="objetivo" rows="3" required>{{ proc.objetivo }}</textarea></div>
-    <div class="form-group"><label>Como realizar</label><textarea name="como_realizar" rows="5" required>{{ proc.como_realizar | join('
-') }}</textarea></div>
-    <div class="form-group"><label>Pontos de atenção</label><textarea name="pontos_atencao" rows="3">{{ proc.pontos_atencao | join('
-') }}</textarea></div>
+    <div class="form-group"><label>Como realizar (escreva livremente, use Enter para parágrafos ou tópicos)</label><textarea name="como_realizar" rows="5" required>{{ proc.como_realizar | join('\n') if proc.como_realizar is iterable and proc.como_realizar is not string else proc.como_realizar }}</textarea></div>
+    <div class="form-group"><label>Pontos de atenção (escreva livremente, use Enter para parágrafos ou tópicos)</label><textarea name="pontos_atencao" rows="3">{{ proc.pontos_atencao | join('\n') if proc.pontos_atencao is iterable and proc.pontos_atencao is not string else proc.pontos_atencao }}</textarea></div>
     <div class="form-group">
         <label>Anexar Arquivos (Fotos, Vídeos, PDFs, Documentos)</label>
         {% if anexos %}
