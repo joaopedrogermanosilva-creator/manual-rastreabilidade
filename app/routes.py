@@ -1,10 +1,13 @@
 import logging
 import hmac
+import json
 import os
+import tempfile
 from fastapi import APIRouter, Depends, HTTPException, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
+from pathlib import Path
 from uuid import UUID
 import mimetypes
 import re
@@ -41,6 +44,35 @@ from app.dados_pastas import (
 
 logger = logging.getLogger(__name__)
 auth_router = APIRouter()
+AJUDA_FILE = Path(__file__).with_name("ajuda.json")
+
+
+def _carregar_ajuda() -> dict[str, str]:
+    with AJUDA_FILE.open("r", encoding="utf-8") as arquivo:
+        ajuda = json.load(arquivo)
+    if not isinstance(ajuda, dict) or not isinstance(ajuda.get("titulo"), str) or not isinstance(ajuda.get("conteudo"), str):
+        raise ValueError("O arquivo app/ajuda.json deve conter os campos texto 'titulo' e 'conteudo'.")
+    return {"titulo": ajuda["titulo"], "conteudo": ajuda["conteudo"]}
+
+
+def _salvar_ajuda(ajuda: dict[str, str]) -> None:
+    arquivo_temporario = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=AJUDA_FILE.parent,
+            prefix=".ajuda-",
+            suffix=".tmp",
+            delete=False,
+        ) as arquivo:
+            arquivo_temporario = Path(arquivo.name)
+            json.dump(ajuda, arquivo, ensure_ascii=False, indent=2)
+            arquivo.write("\n")
+        os.replace(arquivo_temporario, AJUDA_FILE)
+    finally:
+        if arquivo_temporario is not None:
+            arquivo_temporario.unlink(missing_ok=True)
 
 
 def verificar_admin(request: Request):
@@ -98,6 +130,12 @@ def get_menu_completo():
 def _menu_context(request: Request):
     return {
         "menu_pastas": get_menu_completo(),
+    }
+
+
+def _ajuda_context(request: Request):
+    return {
+        "ajuda": _carregar_ajuda(),
         "is_admin": request.session.get("is_admin") is True,
     }
 
@@ -116,9 +154,12 @@ def _buscar_pasta_da_categoria(slug: str, categoria: dict | None = None):
 
 templates = Jinja2Templates(
     directory="app/templates",
-    context_processors=[_menu_context],
+    context_processors=[_menu_context, _ajuda_context],
 )
-login_templates = Jinja2Templates(directory="app/templates")
+login_templates = Jinja2Templates(
+    directory="app/templates",
+    context_processors=[_ajuda_context],
+)
 EXTENSOES_ANEXOS_PERMITIDAS = {
     ".pdf",
     ".png",
@@ -189,6 +230,31 @@ def autenticar(request: Request, senha: Annotated[str, Form()]):
 def logout(request: Request):
     request.session.clear()
     return RedirectResponse("/", 303)
+
+
+@router.get(
+    "/admin/ajuda",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verificar_admin)],
+)
+def editar_ajuda(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="editar_ajuda.html",
+        context={"ajuda": _carregar_ajuda(), "salvo": request.query_params.get("salvo") == "1"},
+    )
+
+
+@router.post("/admin/ajuda", dependencies=[Depends(verificar_admin)])
+def salvar_ajuda(
+    titulo: Annotated[str, Form()],
+    conteudo: Annotated[str, Form()],
+):
+    titulo = titulo.strip()
+    if not titulo:
+        raise HTTPException(status_code=422, detail="O título da ajuda não pode ficar vazio.")
+    _salvar_ajuda({"titulo": titulo, "conteudo": conteudo})
+    return RedirectResponse("/admin/ajuda?salvo=1", status_code=303)
 
 
 @router.get("/", response_class=HTMLResponse)

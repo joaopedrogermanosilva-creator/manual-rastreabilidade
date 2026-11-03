@@ -542,10 +542,12 @@ body {
     border-radius: 50%;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     font-size: 26px;
+    opacity: 0.4;
     cursor: pointer;
     transition: transform 0.2s, opacity 0.2s;
 }
-.fab-btn:hover { transform: translateY(-2px); }
+.fab-btn[hidden] { display: none; }
+.fab-btn:hover { opacity: 1; transform: translateY(-2px); }
 .fab-btn:focus-visible,
 .info-dialog-close:focus-visible,
 .info-dialog-actions button:focus-visible {
@@ -606,8 +608,32 @@ body {
 .info-dialog-list li { display: grid; gap: 4px; line-height: 1.55; }
 .info-dialog-list strong { color: var(--text); }
 .info-dialog-list span { color: var(--text-dim); }
-.info-dialog-actions { display: flex; justify-content: flex-end; margin-top: 24px; }
+.info-dialog-text {
+    margin: 22px 0;
+    color: var(--text-dim);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+.info-dialog-hide-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.5;
+    cursor: pointer;
+}
+.info-dialog-hide-option input { margin-top: 3px; accent-color: var(--accent); }
+.info-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+}
 .info-dialog-actions .btn-primary { min-height: 44px; }
+.info-dialog-actions .btn-cancel { padding: 12px 14px; }
 
 /* ===== NAVEGAÇÃO HIERÁRQUICA ===== */
 .folder-breadcrumb {
@@ -864,6 +890,27 @@ body {
     border-color: var(--accent);
     background: var(--accent-soft);
 }
+.sidebar-footer .sidebar-restore-help {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px;
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+    cursor: pointer;
+}
+.sidebar-footer .sidebar-restore-help:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.sidebar-footer .sidebar-restore-help[hidden] { display: none; }
 
 /* ===== LOGIN ===== */
 .login-page {

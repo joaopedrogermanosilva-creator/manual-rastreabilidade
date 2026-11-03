@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Editar Ajuda{% endblock %}
+{% block content %}
+<section class="hero">
+    <a href="/" class="back-link"><i class="ph ph-arrow-left"></i> Voltar</a>
+    <h1>Editar Ajuda<span class="accent">.</span></h1>
+    <p class="subtitle">Atualize o título e o texto exibidos no botão de ajuda.</p>
+</section>
+{% if salvo %}
+{% set toast_message = "Ajuda atualizada com sucesso." %}
+{% include "toast_sucesso.html" %}
+{% endif %}
+<form action="/admin/ajuda" method="POST" class="form-manual">
+    <div class="form-group">
+        <label for="ajuda-titulo">Título</label>
+        <input id="ajuda-titulo" type="text" name="titulo" value="{{ ajuda.titulo }}" required>
+    </div>
+    <div class="form-group">
+        <label for="ajuda-conteudo">Texto da ajuda</label>
+        <textarea id="ajuda-conteudo" name="conteudo" rows="14" required>{{ ajuda.conteudo }}</textarea>
+        <small>Use linhas em branco para separar os tópicos e parágrafos.</small>
+    </div>
+    <div class="form-actions">
+        <a href="/" class="btn-cancel">Cancelar</a>
+        <button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar Ajuda</button>
+    </div>
+</form>
+{% endblock %}

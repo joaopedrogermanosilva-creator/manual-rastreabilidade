@@ -5,19 +5,20 @@
 <dialog id="modal-info" aria-labelledby="modal-info-titulo">
     <div class="info-dialog-content">
         <header class="info-dialog-header">
-            <h2 id="modal-info-titulo">Bem-vindo ao Manual de Rastreabilidade</h2>
+            <h2 id="modal-info-titulo">{{ ajuda.titulo }}</h2>
             <button type="button" class="info-dialog-close" data-info-close aria-label="Fechar ajuda" title="Fechar">
                 <i class="ph ph-x" aria-hidden="true"></i>
             </button>
         </header>
-        <ul class="info-dialog-list">
-            <li><strong>O que é este app?</strong><span>Um manual digital para consulta rápida dos procedimentos de recebimento e rastreabilidade.</span></li>
-            <li><strong>Modo Leitor</strong><span>Você pode pesquisar e consultar qualquer procedimento livremente. Basta usar a barra de busca ou navegar pelas pastas.</span></li>
-            <li><strong>Modo Admin</strong><span>Para criar, editar ou excluir procedimentos e pastas, clique em “Login Admin” no menu lateral e insira a senha.</span></li>
-            <li><strong>Anexos</strong><span>Os procedimentos podem conter fotos, PDFs, vídeos e documentos. Lembrete: vídeos até 20 MB.</span></li>
-            <li><strong>Dica</strong><span>Use o menu lateral (☰) para navegar entre as pastas de operações.</span></li>
-        </ul>
+        <p class="info-dialog-text">{{ ajuda.conteudo }}</p>
+        <label class="info-dialog-hide-option">
+            <input type="checkbox" id="esconder-ajuda">
+            <span>Não mostrar novamente nas telas internas</span>
+        </label>
         <div class="info-dialog-actions">
+            {% if is_admin %}
+            <a href="/admin/ajuda" class="btn-cancel"><i class="ph ph-pencil-simple"></i> Editar Ajuda</a>
+            {% endif %}
             <button type="button" class="btn-primary" data-info-close>Entendi</button>
         </div>
     </div>
