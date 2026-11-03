@@ -4,9 +4,14 @@ import secrets
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
+from starlette.requests import Request
 from starlette.middleware.sessions import SessionMiddleware
 from app.routes import auth_router, router
+
+logger = logging.getLogger(__name__)
+error_templates = Jinja2Templates(directory="app/templates")
 
 app = FastAPI(
     title="Manual de Rastreabilidade",
@@ -14,6 +19,23 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None,
 )
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected_error(request: Request, exc: Exception) -> HTMLResponse:
+    logger.exception(
+        "Unhandled exception while handling %s %s",
+        request.method,
+        request.url.path,
+        exc_info=exc,
+    )
+    return error_templates.TemplateResponse(
+        request=request,
+        name="erro.html",
+        context={},
+        status_code=500,
+    )
+
 
 session_secret = os.getenv("SESSION_SECRET_KEY")
 if not session_secret:

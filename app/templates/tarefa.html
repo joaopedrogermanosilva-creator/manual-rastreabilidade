@@ -52,7 +52,7 @@
                     </video>
                 {% elif anexo.is_image %}
                     <a href="{{ anexo.arquivo_url }}" target="_blank" rel="noopener noreferrer">
-                        <img src="{{ anexo.arquivo_url }}" alt="{{ anexo.nome_original }}" class="anexo-preview">
+                        <img src="{{ anexo.arquivo_url }}" alt="{{ anexo.nome_original }}" class="anexo-preview" loading="lazy">
                     </a>
                     <h3>{{ anexo.nome_original }}</h3>
                     <a href="{{ anexo.arquivo_url }}" target="_blank" rel="noopener noreferrer" class="btn-primary">

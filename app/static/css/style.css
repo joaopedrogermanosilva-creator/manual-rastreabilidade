@@ -1022,6 +1022,41 @@ body {
     .login-card { padding: 28px 22px; }
 }
 
+/* ===== ERRO INESPERADO ===== */
+.error-page {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+}
+.error-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 460px);
+    padding: 36px 30px;
+    text-align: center;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+.error-brand-mark {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 16px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 50%;
+    font-size: 28px;
+}
+.error-card h1 { margin: 0 0 8px; font-size: 28px; }
+.error-card p { margin: 0 0 24px; color: var(--text-dim); line-height: 1.6; }
+.error-card .btn-primary { text-decoration: none; }
+
 
 /* ===== ÍCONES E DESIGN DOS PASSOS ===== */
 .section-title i {
