@@ -6,19 +6,7 @@
 {% include "toast_sucesso.html" %}
 {% endif %}
 <section class="hero">
-    <nav class="folder-breadcrumb" aria-label="Breadcrumb">
-        <a href="/">Início</a>
-        <span aria-hidden="true">›</span>
-        <a href="/">Pastas principais</a>
-        {% for item in breadcrumb %}
-        <span aria-hidden="true">›</span>
-        {% if not loop.last %}
-        <a href="/pasta/{{ item.id }}">{{ item.nome }}</a>
-        {% else %}
-        <span aria-current="page">{{ item.nome }}</span>
-        {% endif %}
-        {% endfor %}
-    </nav>
+    <a href="{{ url_voltar }}" class="btn-voltar"><i class="ph ph-arrow-left"></i> Voltar</a>
     <h1>{% if pasta %}{{ pasta.nome }}{% else %}Pastas{% endif %}<span class="accent">.</span></h1>
     {% if pasta and pasta.descricao %}<p class="subtitle">{{ pasta.descricao }}</p>{% endif %}
     <div class="folder-actions">

@@ -5,6 +5,10 @@
 {% set toast_message = "✅ Pasta atualizada com sucesso!" %}
 {% include "toast_sucesso.html" %}
 {% endif %}
+{% if ajuda_salva %}
+{% set toast_message = "✅ Texto de ajuda atualizado com sucesso!" %}
+{% include "toast_sucesso.html" %}
+{% endif %}
 <section class="landing-hero">
     <div class="landing-content">
         <h1>Central de Consulta<span class="accent">.</span></h1>

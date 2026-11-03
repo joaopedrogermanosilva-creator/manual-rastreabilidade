@@ -39,7 +39,6 @@ from app.dados_pastas import (
     listar_pastas,
     listar_procedimentos_da_pasta,
     listar_todas_pastas,
-    obter_breadcrumb,
 )
 
 logger = logging.getLogger(__name__)
@@ -254,7 +253,7 @@ def salvar_ajuda(
     if not titulo:
         raise HTTPException(status_code=422, detail="O título da ajuda não pode ficar vazio.")
     _salvar_ajuda({"titulo": titulo, "conteudo": conteudo})
-    return RedirectResponse("/admin/ajuda?salvo=1", status_code=303)
+    return RedirectResponse(url="/?ajuda_salva=1", status_code=303)
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -265,6 +264,7 @@ def home(request: Request):
         context={
             "categorias": get_categorias(),
             "sucesso_pasta": request.query_params.get("sucesso_pasta") == "1",
+            "ajuda_salva": request.query_params.get("ajuda_salva") == "1",
         },
     )
 
@@ -426,7 +426,7 @@ def pasta(pasta_id: UUID, request: Request):
         name="pasta.html",
         context={
             "pasta": pasta_atual,
-            "breadcrumb": obter_breadcrumb(pasta_id),
+            "url_voltar": f"/pasta/{pasta_atual['parent_id']}" if pasta_atual.get("parent_id") else "/",
             "subpastas": listar_pastas(pasta_id),
             "procedimentos": procedimentos,
             "erro": request.query_params.get("erro"),
@@ -665,6 +665,7 @@ def tarefa(proc_id: int, request: Request):
             "proc": proc,
             "categoria": cats.get(proc["categoria_slug"], {"titulo": ""}),
             "pasta": pasta_atual,
+            "url_voltar": f"/pasta/{pasta_atual['id']}" if pasta_atual else "/",
             "categorias": cats,
             "anexos": anexos,
             "sucesso": request.query_params.get("sucesso") == "1",
