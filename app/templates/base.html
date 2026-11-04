@@ -92,7 +92,7 @@
             <header class="modal-empresa-header">
                 <div>
                     <span class="empresa-modal-eyebrow">Perfil da Empresa</span>
-                    <h2 id="modal-empresa-titulo">{{ empresa_razao_social or "Informações da Empresa" }}</h2>
+                    <h2 id="modal-empresa-titulo">Perfil da Empresa</h2>
                 </div>
                 <button type="button" class="info-dialog-close" data-empresa-close aria-label="Fechar perfil da empresa" title="Fechar">
                     <i class="ph ph-x" aria-hidden="true"></i>
@@ -100,9 +100,16 @@
             </header>
 
             <div class="modal-empresa-details">
+                {% set cnpjs_modal = (empresa_cnpjs or "").split("\n") %}
+                {% set cnpjs_normalizados = cnpjs_modal | map("trim") | list %}
+                {% if empresa_razao_social and empresa_razao_social | trim not in cnpjs_normalizados %}
+                <section class="modal-empresa-field">
+                    <h3>{{ label_razao_social }}</h3>
+                    <p class="texto-livre">{{ empresa_razao_social }}</p>
+                </section>
+                {% endif %}
                 <section class="modal-empresa-field">
                     <h3>{{ label_cnpj }}</h3>
-                    {% set cnpjs_modal = (empresa_cnpjs or "").split("\n") %}
                     {% if empresa_cnpjs | trim %}
                     <ul class="empresa-cnpjs">
                         {% for cnpj in cnpjs_modal %}
@@ -114,18 +121,6 @@
                     {% else %}
                     <p class="texto-livre">Não cadastrado</p>
                     {% endif %}
-                </section>
-                <section class="modal-empresa-field">
-                    <h3>{{ label_razao_social }}</h3>
-                    <p class="texto-livre">{{ empresa_razao_social or "Não cadastrado" }}</p>
-                </section>
-                <section class="modal-empresa-field">
-                    <h3>{{ label_endereco }}</h3>
-                    <p class="texto-livre">{{ empresa_endereco or "Não cadastrado" }}</p>
-                </section>
-                <section class="modal-empresa-field">
-                    <h3>{{ label_telefone }}</h3>
-                    <p class="texto-livre">{{ empresa_telefone or "Não cadastrado" }}</p>
                 </section>
             </div>
 
