@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Perfil da Empresa{% endblock %}
+{% block content %}
+{% if sucesso %}
+{% set toast_message = "✅ Informações da empresa atualizadas com sucesso!" %}
+{% include "toast_sucesso.html" %}
+{% endif %}
+<section class="hero empresa-hero">
+    <h1>Perfil da Empresa<span class="accent">.</span></h1>
+    <p class="subtitle">Informações institucionais e orientações gerais da operação.</p>
+</section>
+
+<section class="empresa-section">
+    <div class="empresa-section-heading">
+        <h2 class="section-title">Dados da Empresa</h2>
+        {% if is_admin %}
+        <a href="/empresa/editar" class="btn-primary"><i class="ph ph-pencil-simple"></i> Editar Informações</a>
+        {% endif %}
+    </div>
+    <dl class="empresa-dados">
+        <div class="empresa-dado">
+            <dt>CNPJ</dt>
+            <dd>{{ empresa.cnpj or "Não cadastrado" }}</dd>
+        </div>
+        <div class="empresa-dado">
+            <dt>Razão Social</dt>
+            <dd>{{ empresa.razao_social or "Não cadastrado" }}</dd>
+        </div>
+        <div class="empresa-dado">
+            <dt>Endereço</dt>
+            <dd>{{ empresa.endereco or "Não cadastrado" }}</dd>
+        </div>
+        <div class="empresa-dado">
+            <dt>Telefone</dt>
+            <dd>{{ empresa.telefone or "Não cadastrado" }}</dd>
+        </div>
+    </dl>
+</section>
+
+<section class="empresa-section">
+    <h2 class="section-title">Manual Geral</h2>
+    <div class="empresa-manual texto-livre">{{ empresa.manual_geral or "Não cadastrado" }}</div>
+</section>
+{% endblock %}

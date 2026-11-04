@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Editar Informações da Empresa{% endblock %}
+{% block content %}
+<section class="hero">
+    <a href="/empresa" class="btn-voltar"><i class="ph ph-arrow-left"></i> Voltar</a>
+    <h1>Editar Informações<span class="accent">.</span></h1>
+    <p class="subtitle">Atualize os dados da empresa e o conteúdo do Manual Geral.</p>
+</section>
+
+<form action="/empresa/editar" method="POST" class="form-manual empresa-form">
+    <div class="form-group">
+        <label for="empresa-cnpj">CNPJ</label>
+        <input id="empresa-cnpj" name="cnpj" type="text" value="{{ empresa.cnpj }}" autocomplete="organization">
+    </div>
+    <div class="form-group">
+        <label for="empresa-razao-social">Razão Social</label>
+        <input id="empresa-razao-social" name="razao_social" type="text" value="{{ empresa.razao_social }}" autocomplete="organization">
+    </div>
+    <div class="form-group">
+        <label for="empresa-endereco">Endereço</label>
+        <input id="empresa-endereco" name="endereco" type="text" value="{{ empresa.endereco }}" autocomplete="street-address">
+    </div>
+    <div class="form-group">
+        <label for="empresa-telefone">Telefone</label>
+        <input id="empresa-telefone" name="telefone" type="tel" value="{{ empresa.telefone }}" autocomplete="tel">
+    </div>
+    <div class="form-group empresa-manual-field">
+        <label for="empresa-manual">Manual Geral</label>
+        <textarea id="empresa-manual" name="manual_geral" rows="18">{{ empresa.manual_geral }}</textarea>
+        <small>Use linhas em branco para separar parágrafos e tópicos.</small>
+    </div>
+    <div class="form-actions">
+        <a href="/empresa" class="btn-cancel">Cancelar</a>
+        <button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar Informações</button>
+    </div>
+</form>
+{% endblock %}

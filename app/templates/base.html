@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=15">
+    <link rel="stylesheet" href="/static/css/style.css?v=16">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -71,9 +71,14 @@
             <span class="brand-name">RASTREABILIDADE</span>
             <a href="/buscar" class="top-search-btn">&#128269;</a>
         </div>
-        <button id="theme-toggle" class="theme-btn" title="Alternar tema">
-            <span class="theme-icon"><i class="ph ph-moon"></i></span>
-        </button>
+        <div class="topbar-actions">
+            <a href="/empresa" class="profile-btn" aria-label="Informações da empresa" title="Informações da empresa">
+                <i class="ph ph-user-circle" aria-hidden="true"></i>
+            </a>
+            <button id="theme-toggle" class="theme-btn" title="Alternar tema">
+                <span class="theme-icon"><i class="ph ph-moon"></i></span>
+            </button>
+        </div>
     </header>
 
     <main class="container">

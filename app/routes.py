@@ -258,6 +258,69 @@ def home(request: Request):
         },
     )
 
+
+@router.get("/empresa", response_class=HTMLResponse)
+def empresa(request: Request):
+    configuracoes = {
+        "cnpj": get_configuracao("empresa_cnpj"),
+        "razao_social": get_configuracao("empresa_razao_social"),
+        "endereco": get_configuracao("empresa_endereco"),
+        "telefone": get_configuracao("empresa_telefone"),
+        "manual_geral": get_configuracao("empresa_manual_geral"),
+    }
+    return templates.TemplateResponse(
+        request=request,
+        name="empresa.html",
+        context={
+            "empresa": configuracoes,
+            "sucesso": request.query_params.get("sucesso") == "1",
+        },
+    )
+
+
+@router.get(
+    "/empresa/editar",
+    response_class=HTMLResponse,
+    dependencies=[Depends(verificar_admin)],
+)
+def form_editar_empresa(request: Request):
+    configuracoes = {
+        "cnpj": get_configuracao("empresa_cnpj") or "",
+        "razao_social": get_configuracao("empresa_razao_social") or "",
+        "endereco": get_configuracao("empresa_endereco") or "",
+        "telefone": get_configuracao("empresa_telefone") or "",
+        "manual_geral": get_configuracao("empresa_manual_geral") or "",
+    }
+    return templates.TemplateResponse(
+        request=request,
+        name="form_empresa.html",
+        context={"empresa": configuracoes},
+    )
+
+
+@router.post(
+    "/empresa/editar",
+    dependencies=[Depends(verificar_admin)],
+)
+def salvar_edicao_empresa(
+    cnpj: Annotated[str, Form()] = "",
+    razao_social: Annotated[str, Form()] = "",
+    endereco: Annotated[str, Form()] = "",
+    telefone: Annotated[str, Form()] = "",
+    manual_geral: Annotated[str, Form()] = "",
+):
+    configuracoes = {
+        "empresa_cnpj": cnpj.strip(),
+        "empresa_razao_social": razao_social.strip(),
+        "empresa_endereco": endereco.strip(),
+        "empresa_telefone": telefone.strip(),
+        "empresa_manual_geral": manual_geral.strip(),
+    }
+    for chave, valor in configuracoes.items():
+        salvar_configuracao(chave, valor)
+    return RedirectResponse(url="/empresa?sucesso=1", status_code=303)
+
+
 @router.get("/categoria/{slug}", response_class=HTMLResponse)
 def categoria(slug: str, request: Request):
     cats = get_categorias()

@@ -71,6 +71,35 @@ body {
     transition: border-color 0.2s;
 }
 .theme-btn:hover { border-color: var(--accent); }
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.profile-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 19px;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.profile-btn:hover,
+.profile-btn:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.profile-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
 
 /* ===== MENU LATERAL (SIDEBAR) ===== */
 .overlay {
@@ -428,6 +457,56 @@ body {
 .bloco:hover { transform: translateX(4px); }
 .bloco p { margin: 0; color: var(--text-dim); line-height: 1.6; }
 .texto-livre { white-space: pre-wrap; line-height: 1.6; color: var(--text-dim); }
+.empresa-section {
+    margin-top: 24px;
+    padding: 24px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+.empresa-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.empresa-section-heading .section-title { margin: 0; }
+.empresa-dados {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 24px;
+    margin: 0;
+}
+.empresa-dado { min-width: 0; }
+.empresa-dado dt {
+    margin-bottom: 5px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+.empresa-dado dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+.empresa-manual {
+    min-height: 140px;
+    padding: 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+.empresa-manual-field textarea { min-height: 300px; }
+.empresa-form { gap: 20px; }
+@media (max-width: 600px) {
+    .empresa-section { padding: 18px 16px; }
+    .empresa-section-heading { align-items: flex-start; flex-direction: column; }
+    .empresa-dados { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .empresa-manual { padding: 15px; }
+}
 .passos, .atencao { margin: 0; padding-left: 20px; color: var(--text-dim); line-height: 1.7; }
 .passos li, .atencao li { margin-bottom: 8px; }
 
