@@ -2,7 +2,7 @@ import logging
 import os
 import secrets
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -66,6 +66,12 @@ def service_worker():
 @app.get("/manifest.json")
 def manifest():
     return FileResponse("app/static/manifest.json", media_type="application/json")
+
+
+@app.head("/")
+def head_root():
+    return Response(status_code=200)
+
 
 # Rotas do app
 app.include_router(auth_router)
