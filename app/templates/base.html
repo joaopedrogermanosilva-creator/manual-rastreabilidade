@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=17">
+    <link rel="stylesheet" href="/static/css/style.css?v=18">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -72,9 +72,9 @@
             <a href="/buscar" class="top-search-btn">&#128269;</a>
         </div>
         <div class="topbar-actions">
-            <a href="/empresa" class="profile-btn" aria-label="Informações da empresa" title="Informações da empresa">
+            <button type="button" id="btn-perfil" class="profile-btn" aria-label="Informações da empresa" aria-haspopup="dialog" aria-controls="modal-empresa" title="Informações da empresa">
                 <i class="ph ph-user-circle" aria-hidden="true"></i>
-            </a>
+            </button>
             <button id="theme-toggle" class="theme-btn" title="Alternar tema">
                 <span class="theme-icon"><i class="ph ph-moon"></i></span>
             </button>
@@ -86,6 +86,62 @@
     </main>
 
     {% include "info_help.html" %}
+
+    <dialog id="modal-empresa" class="modal-empresa" aria-labelledby="modal-empresa-titulo">
+        <div class="modal-empresa-content">
+            <header class="modal-empresa-header">
+                <div>
+                    <span class="empresa-modal-eyebrow">Perfil da Empresa</span>
+                    <h2 id="modal-empresa-titulo">{{ empresa_razao_social or "Informações da Empresa" }}</h2>
+                </div>
+                <button type="button" class="info-dialog-close" data-empresa-close aria-label="Fechar perfil da empresa" title="Fechar">
+                    <i class="ph ph-x" aria-hidden="true"></i>
+                </button>
+            </header>
+
+            <div class="modal-empresa-details">
+                <section class="modal-empresa-field">
+                    <h3>{{ label_cnpj }}</h3>
+                    {% set cnpjs_modal = (empresa_cnpjs or "").split("\n") %}
+                    {% if empresa_cnpjs | trim %}
+                    <ul class="empresa-cnpjs">
+                        {% for cnpj in cnpjs_modal %}
+                        {% if cnpj | trim %}
+                        <li>{{ cnpj | trim }}</li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="texto-livre">Não cadastrado</p>
+                    {% endif %}
+                </section>
+                <section class="modal-empresa-field">
+                    <h3>{{ label_razao_social }}</h3>
+                    <p class="texto-livre">{{ empresa_razao_social or "Não cadastrado" }}</p>
+                </section>
+                <section class="modal-empresa-field">
+                    <h3>{{ label_endereco }}</h3>
+                    <p class="texto-livre">{{ empresa_endereco or "Não cadastrado" }}</p>
+                </section>
+                <section class="modal-empresa-field">
+                    <h3>{{ label_telefone }}</h3>
+                    <p class="texto-livre">{{ empresa_telefone or "Não cadastrado" }}</p>
+                </section>
+            </div>
+
+            <footer class="modal-empresa-actions">
+                {% if empresa_manual_geral_url %}
+                <a class="btn-primary empresa-modal-manual" href="{{ empresa_manual_geral_url }}" target="_blank" rel="noopener noreferrer">
+                    <i class="ph ph-file-pdf" aria-hidden="true"></i> Abrir {{ label_manual_geral }} (PDF)
+                </a>
+                {% endif %}
+                {% if is_admin %}
+                <a href="/empresa/editar" class="btn-cancel"><i class="ph ph-pencil-simple" aria-hidden="true"></i> Editar Informações</a>
+                {% endif %}
+                <button type="button" class="btn-cancel" data-empresa-close>Fechar</button>
+            </footer>
+        </div>
+    </dialog>
 
     <dialog id="modal-confirmacao" class="confirm-dialog" aria-labelledby="modal-confirmacao-titulo" aria-describedby="modal-confirmacao-mensagem">
         <div class="confirm-dialog-content">
@@ -101,7 +157,7 @@
 
     <script src="/static/js/theme.js"></script>
     <script src="/static/js/menu.js"></script>
-    <script src="/static/js/info.js"></script>
+    <script src="/static/js/info.js?v=2"></script>
     <script src="/static/js/confirm.js?v=1"></script>
 
     

@@ -3,6 +3,8 @@
     const openButton = document.querySelector(".fab-btn");
     const hideCheckbox = document.getElementById("esconder-ajuda");
     const restoreButton = document.querySelector("[data-info-restore]");
+    const companyDialog = document.getElementById("modal-empresa");
+    const companyOpenButton = document.getElementById("btn-perfil");
     const storageKey = "ocultar_fab";
     const isHome = window.location.pathname === "/";
 
@@ -52,6 +54,16 @@
                 hideCheckbox.checked = false;
             }
             updateVisibility();
+        });
+    }
+
+    if (companyDialog instanceof HTMLDialogElement && companyOpenButton instanceof HTMLButtonElement) {
+        companyOpenButton.addEventListener("click", () => companyDialog.showModal());
+        companyDialog.querySelectorAll("[data-empresa-close]").forEach((button) => {
+            button.addEventListener("click", () => companyDialog.close());
+        });
+        companyDialog.addEventListener("click", (event) => {
+            if (event.target === companyDialog) companyDialog.close();
         });
     }
 

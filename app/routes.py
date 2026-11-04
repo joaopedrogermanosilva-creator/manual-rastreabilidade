@@ -120,12 +120,25 @@ def _texto_ajuda() -> str:
 
 
 def _ajuda_context(request: Request):
+    empresa_cnpjs = get_configuracao("empresa_cnpjs")
+    if empresa_cnpjs is None:
+        empresa_cnpjs = get_configuracao("empresa_cnpj") or ""
     return {
         "ajuda": {
             "titulo": TITULO_AJUDA,
             "conteudo": _texto_ajuda(),
         },
         "is_admin": request.session.get("is_admin") is True,
+        "empresa_cnpjs": empresa_cnpjs,
+        "empresa_manual_geral_url": get_configuracao("empresa_manual_geral_url"),
+        "label_manual_geral": get_configuracao("label_manual_geral") or "Manual Geral",
+        "label_cnpj": get_configuracao("label_cnpj") or "CNPJ",
+        "empresa_razao_social": get_configuracao("empresa_razao_social"),
+        "label_razao_social": get_configuracao("label_razao_social") or "Razão Social",
+        "empresa_endereco": get_configuracao("empresa_endereco"),
+        "label_endereco": get_configuracao("label_endereco") or "Endereço",
+        "empresa_telefone": get_configuracao("empresa_telefone"),
+        "label_telefone": get_configuracao("label_telefone") or "Telefone",
     }
 
 
