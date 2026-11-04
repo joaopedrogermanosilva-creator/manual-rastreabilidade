@@ -7,27 +7,41 @@
     <p class="subtitle">Atualize os dados da empresa e o conteúdo do Manual Geral.</p>
 </section>
 
-<form action="/empresa/editar" method="POST" class="form-manual empresa-form">
+<form action="/empresa/editar" method="POST" enctype="multipart/form-data" class="form-manual empresa-form">
     <div class="form-group">
-        <label for="empresa-cnpj">CNPJ</label>
-        <input id="empresa-cnpj" name="cnpj" type="text" value="{{ empresa.cnpj }}" autocomplete="organization">
+        <label for="empresa-label-cnpj">Nome do campo 1</label>
+        <input id="empresa-label-cnpj" name="label_cnpj" type="text" value="{{ empresa.label_cnpj }}" required>
+        <label for="empresa-cnpjs">Valor — CNPJ(s)</label>
+        <textarea id="empresa-cnpjs" name="cnpjs" rows="4" placeholder="Um CNPJ por linha ou separados por vírgula">{{ empresa.cnpjs }}</textarea>
+        <small>Você pode informar vários CNPJs, separados por linha ou vírgula.</small>
     </div>
     <div class="form-group">
-        <label for="empresa-razao-social">Razão Social</label>
+        <label for="empresa-label-razao-social">Nome do campo 2</label>
+        <input id="empresa-label-razao-social" name="label_razao_social" type="text" value="{{ empresa.label_razao_social }}" required>
+        <label for="empresa-razao-social">Valor</label>
         <input id="empresa-razao-social" name="razao_social" type="text" value="{{ empresa.razao_social }}" autocomplete="organization">
     </div>
     <div class="form-group">
-        <label for="empresa-endereco">Endereço</label>
+        <label for="empresa-label-endereco">Nome do campo 3</label>
+        <input id="empresa-label-endereco" name="label_endereco" type="text" value="{{ empresa.label_endereco }}" required>
+        <label for="empresa-endereco">Valor</label>
         <input id="empresa-endereco" name="endereco" type="text" value="{{ empresa.endereco }}" autocomplete="street-address">
     </div>
     <div class="form-group">
-        <label for="empresa-telefone">Telefone</label>
+        <label for="empresa-label-telefone">Nome do campo 4</label>
+        <input id="empresa-label-telefone" name="label_telefone" type="text" value="{{ empresa.label_telefone }}" required>
+        <label for="empresa-telefone">Valor</label>
         <input id="empresa-telefone" name="telefone" type="tel" value="{{ empresa.telefone }}" autocomplete="tel">
     </div>
     <div class="form-group empresa-manual-field">
-        <label for="empresa-manual">Manual Geral</label>
-        <textarea id="empresa-manual" name="manual_geral" rows="18">{{ empresa.manual_geral }}</textarea>
-        <small>Use linhas em branco para separar parágrafos e tópicos.</small>
+        <label for="manual-geral-pdf">Manual Geral (PDF)</label>
+        <input id="manual-geral-pdf" name="manual_geral_pdf" type="file" accept="application/pdf,.pdf">
+        <small>Selecione um PDF para substituir o manual atual. Se não selecionar arquivo, o PDF existente será mantido.</small>
+        {% if empresa.manual_geral_url %}
+        <a href="{{ empresa.manual_geral_url }}" target="_blank" rel="noopener noreferrer">Abrir PDF atual</a>
+        {% elif empresa.manual_geral %}
+        <p class="texto-livre">Manual de texto legado cadastrado. Envie um PDF para substituí-lo.</p>
+        {% endif %}
     </div>
     <div class="form-actions">
         <a href="/empresa" class="btn-cancel">Cancelar</a>

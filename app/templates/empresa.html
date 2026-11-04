@@ -6,6 +6,7 @@
 {% include "toast_sucesso.html" %}
 {% endif %}
 <section class="hero empresa-hero">
+    <a href="/" class="btn-voltar"><i class="ph ph-arrow-left"></i> Voltar</a>
     <h1>Perfil da Empresa<span class="accent">.</span></h1>
     <p class="subtitle">Informações institucionais e orientações gerais da operação.</p>
 </section>
@@ -19,19 +20,29 @@
     </div>
     <dl class="empresa-dados">
         <div class="empresa-dado">
-            <dt>CNPJ</dt>
-            <dd>{{ empresa.cnpj or "Não cadastrado" }}</dd>
+            <dt>{{ empresa.label_cnpj }}</dt>
+            <dd>
+                {% if empresa.cnpjs %}
+                <ul class="empresa-cnpjs">
+                    {% for cnpj in empresa.cnpjs %}
+                    <li>{{ cnpj }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                Não cadastrado
+                {% endif %}
+            </dd>
         </div>
         <div class="empresa-dado">
-            <dt>Razão Social</dt>
+            <dt>{{ empresa.label_razao_social }}</dt>
             <dd>{{ empresa.razao_social or "Não cadastrado" }}</dd>
         </div>
         <div class="empresa-dado">
-            <dt>Endereço</dt>
+            <dt>{{ empresa.label_endereco }}</dt>
             <dd>{{ empresa.endereco or "Não cadastrado" }}</dd>
         </div>
         <div class="empresa-dado">
-            <dt>Telefone</dt>
+            <dt>{{ empresa.label_telefone }}</dt>
             <dd>{{ empresa.telefone or "Não cadastrado" }}</dd>
         </div>
     </dl>
@@ -39,6 +50,16 @@
 
 <section class="empresa-section">
     <h2 class="section-title">Manual Geral</h2>
-    <div class="empresa-manual texto-livre">{{ empresa.manual_geral or "Não cadastrado" }}</div>
+    {% if empresa.manual_geral_url %}
+    <a class="empresa-manual-pdf" href="{{ empresa.manual_geral_url }}" target="_blank" rel="noopener noreferrer">
+        <i class="ph ph-file-pdf" aria-hidden="true"></i>
+        <span>📄 Abrir Manual Geral (PDF)</span>
+        <i class="ph ph-arrow-square-out" aria-hidden="true"></i>
+    </a>
+    {% elif empresa.manual_geral %}
+    <div class="empresa-manual texto-livre">{{ empresa.manual_geral }}</div>
+    {% else %}
+    <div class="empresa-manual texto-livre">Não cadastrado</div>
+    {% endif %}
 </section>
 {% endblock %}

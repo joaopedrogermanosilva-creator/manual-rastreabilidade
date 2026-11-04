@@ -492,6 +492,22 @@ body {
     overflow-wrap: anywhere;
     line-height: 1.5;
 }
+.empresa-cnpjs {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.empresa-cnpjs li {
+    padding: 5px 9px;
+    color: var(--text);
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
 .empresa-manual {
     min-height: 140px;
     padding: 20px;
@@ -499,6 +515,31 @@ body {
     border: 1px solid var(--border);
     border-radius: 8px;
 }
+.empresa-manual-pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 72px;
+    padding: 18px 22px;
+    color: var(--text);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 9px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.empresa-manual-pdf > i:first-child { color: var(--accent); font-size: 24px; }
+.empresa-manual-pdf > i:last-child { color: var(--text-dim); font-size: 18px; }
+.empresa-manual-pdf:hover {
+    background: var(--accent);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.2);
+}
+.empresa-manual-pdf:hover > i { color: #fff; }
 .empresa-manual-field textarea { min-height: 300px; }
 .empresa-form { gap: 20px; }
 @media (max-width: 600px) {
@@ -506,6 +547,7 @@ body {
     .empresa-section-heading { align-items: flex-start; flex-direction: column; }
     .empresa-dados { grid-template-columns: minmax(0, 1fr); gap: 14px; }
     .empresa-manual { padding: 15px; }
+    .empresa-manual-pdf { justify-content: flex-start; padding: 16px; }
 }
 .passos, .atencao { margin: 0; padding-left: 20px; color: var(--text-dim); line-height: 1.7; }
 .passos li, .atencao li { margin-bottom: 8px; }

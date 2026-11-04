@@ -261,12 +261,23 @@ def home(request: Request):
 
 @router.get("/empresa", response_class=HTMLResponse)
 def empresa(request: Request):
+    cnpjs_configurados = get_configuracao("empresa_cnpjs")
+    if cnpjs_configurados is None:
+        cnpj_legado = get_configuracao("empresa_cnpj")
+        cnpjs = [cnpj_legado] if cnpj_legado else []
+    else:
+        cnpjs = [cnpj.strip() for cnpj in cnpjs_configurados.splitlines() if cnpj.strip()]
     configuracoes = {
-        "cnpj": get_configuracao("empresa_cnpj"),
+        "cnpjs": cnpjs,
+        "label_cnpj": get_configuracao("label_cnpj") or "CNPJ",
+        "label_razao_social": get_configuracao("label_razao_social") or "Razão Social",
+        "label_endereco": get_configuracao("label_endereco") or "Endereço",
+        "label_telefone": get_configuracao("label_telefone") or "Telefone",
         "razao_social": get_configuracao("empresa_razao_social"),
         "endereco": get_configuracao("empresa_endereco"),
         "telefone": get_configuracao("empresa_telefone"),
         "manual_geral": get_configuracao("empresa_manual_geral"),
+        "manual_geral_url": get_configuracao("empresa_manual_geral_url"),
     }
     return templates.TemplateResponse(
         request=request,
@@ -284,12 +295,20 @@ def empresa(request: Request):
     dependencies=[Depends(verificar_admin)],
 )
 def form_editar_empresa(request: Request):
+    cnpjs_configurados = get_configuracao("empresa_cnpjs")
+    if cnpjs_configurados is None:
+        cnpjs_configurados = get_configuracao("empresa_cnpj") or ""
     configuracoes = {
-        "cnpj": get_configuracao("empresa_cnpj") or "",
+        "cnpjs": cnpjs_configurados,
+        "label_cnpj": get_configuracao("label_cnpj") or "CNPJ",
+        "label_razao_social": get_configuracao("label_razao_social") or "Razão Social",
+        "label_endereco": get_configuracao("label_endereco") or "Endereço",
+        "label_telefone": get_configuracao("label_telefone") or "Telefone",
         "razao_social": get_configuracao("empresa_razao_social") or "",
         "endereco": get_configuracao("empresa_endereco") or "",
         "telefone": get_configuracao("empresa_telefone") or "",
         "manual_geral": get_configuracao("empresa_manual_geral") or "",
+        "manual_geral_url": get_configuracao("empresa_manual_geral_url") or "",
     }
     return templates.TemplateResponse(
         request=request,
@@ -303,18 +322,64 @@ def form_editar_empresa(request: Request):
     dependencies=[Depends(verificar_admin)],
 )
 def salvar_edicao_empresa(
-    cnpj: Annotated[str, Form()] = "",
+    cnpjs: Annotated[str, Form()] = "",
+    label_cnpj: Annotated[str, Form()] = "",
+    label_razao_social: Annotated[str, Form()] = "",
+    label_endereco: Annotated[str, Form()] = "",
+    label_telefone: Annotated[str, Form()] = "",
     razao_social: Annotated[str, Form()] = "",
     endereco: Annotated[str, Form()] = "",
     telefone: Annotated[str, Form()] = "",
-    manual_geral: Annotated[str, Form()] = "",
+    manual_geral_pdf: UploadFile | None = File(None),
 ):
+    manual_pdf_url = get_configuracao("empresa_manual_geral_url") or ""
+    if manual_geral_pdf and manual_geral_pdf.filename:
+        filename = manual_geral_pdf.filename.lower()
+        tipos_pdf_aceitos = {
+            None,
+            "application/pdf",
+            "application/x-pdf",
+            "application/octet-stream",
+        }
+        if (
+            not filename.endswith(".pdf")
+            or manual_geral_pdf.content_type not in tipos_pdf_aceitos
+        ):
+            raise HTTPException(400, "O Manual Geral deve ser enviado como arquivo PDF.")
+        conteudo = manual_geral_pdf.file.read(20 * 1024 * 1024 + 1)
+        if len(conteudo) > 20 * 1024 * 1024:
+            raise HTTPException(413, "O PDF do Manual Geral deve ter no máximo 20 MB.")
+        if not conteudo.startswith(b"%PDF-"):
+            raise HTTPException(400, "O arquivo enviado não parece ser um PDF válido.")
+        caminho_pdf = f"empresa/manual-geral-{uuid4().hex}.pdf"
+        try:
+            bucket = supabase.storage.from_("documentos")
+            bucket.upload(
+                caminho_pdf,
+                conteudo,
+                {"content-type": "application/pdf"},
+            )
+            manual_pdf_url = bucket.get_public_url(caminho_pdf)
+        except Exception as exc:
+            logger.exception("Falha ao enviar o Manual Geral para o Supabase Storage.")
+            raise HTTPException(
+                502, "Não foi possível enviar o Manual Geral. Tente novamente."
+            ) from exc
+
     configuracoes = {
-        "empresa_cnpj": cnpj.strip(),
+        "empresa_cnpjs": "\n".join(
+            cnpj.strip()
+            for cnpj in re.split(r"[\n,]+", cnpjs)
+            if cnpj.strip()
+        ),
+        "label_cnpj": label_cnpj.strip() or "CNPJ",
+        "label_razao_social": label_razao_social.strip() or "Razão Social",
+        "label_endereco": label_endereco.strip() or "Endereço",
+        "label_telefone": label_telefone.strip() or "Telefone",
         "empresa_razao_social": razao_social.strip(),
         "empresa_endereco": endereco.strip(),
         "empresa_telefone": telefone.strip(),
-        "empresa_manual_geral": manual_geral.strip(),
+        "empresa_manual_geral_url": manual_pdf_url,
     }
     for chave, valor in configuracoes.items():
         salvar_configuracao(chave, valor)
