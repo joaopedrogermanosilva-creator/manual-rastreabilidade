@@ -24,6 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (event.target instanceof Element && event.target.closest('a')) {
                 closeMenuAction();
             }
-        });
+        }, true);
     }
 });
