@@ -34,7 +34,9 @@
         <input id="empresa-telefone" name="telefone" type="tel" value="{{ empresa.telefone }}" autocomplete="tel">
     </div>
     <div class="form-group empresa-manual-field">
-        <label for="manual-geral-pdf">Manual Geral (PDF)</label>
+        <label for="label-manual-geral">Título do Manual Geral</label>
+        <input id="label-manual-geral" name="label_manual_geral" type="text" value="{{ empresa.label_manual_geral }}" required>
+        <label for="manual-geral-pdf">Arquivo PDF</label>
         <input id="manual-geral-pdf" name="manual_geral_pdf" type="file" accept="application/pdf,.pdf">
         <small>Selecione um PDF para substituir o manual atual. Se não selecionar arquivo, o PDF existente será mantido.</small>
         {% if empresa.manual_geral_url %}
