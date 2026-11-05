@@ -5,7 +5,7 @@
     <a href="/tarefa/{{ proc.id }}" class="back-link"><i class="ph ph-arrow-left"></i> Voltar</a>
     <h1>Editar Procedimento<span class="accent">.</span></h1>
 </section>
-<form action="/tarefa/{{ proc.id }}/editar" method="POST" class="form-manual" enctype="multipart/form-data">
+<form action="/tarefa/{{ proc.id }}/editar" method="POST" class="form-manual" enctype="multipart/form-data" data-loading-form>
     <div class="form-group"><label>Título</label><input type="text" name="titulo" required value="{{ proc.titulo }}"></div>
     <div class="form-group"><label>Pasta <small>(opcional)</small></label><select name="pasta_id"><option value="__none__" {% if not proc.pasta_id %}selected{% endif %}>Sem pasta (raiz)</option>{% for pasta in pastas %}<option value="{{ pasta.id }}" {% if proc.pasta_id|string == pasta.id|string %}selected{% endif %}>{{ pasta.caminho }}</option>{% endfor %}</select></div>
     <div class="form-group"><label>Resumo Curto</label><input type="text" name="resumo" required value="{{ proc.resumo }}"></div>
@@ -39,7 +39,7 @@
         {% endif %}
         <input type="file" name="arquivos" multiple accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx,video/*">
     </div>
-    <div class="form-actions"><a href="/tarefa/{{ proc.id }}" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar</button></div>
+    <div class="form-actions"><a href="/tarefa/{{ proc.id }}" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> <span data-submit-label>Salvar</span></button></div>
 </form>
 {% for anexo in anexos %}
 {% if anexo.id %}

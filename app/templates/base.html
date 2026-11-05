@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=18">
+    <link rel="stylesheet" href="/static/css/style.css?v=19">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -17,7 +17,8 @@
     </script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body>
+<body class="page-fade">
+    <div id="progress-bar" aria-hidden="true"></div>
     <div id="overlay" class="overlay"></div>
     <aside id="sidebar" class="sidebar">
         <div class="sidebar-header">
@@ -156,7 +157,7 @@
     </dialog>
 
     <script src="/static/js/theme.js"></script>
-    <script src="/static/js/menu.js"></script>
+    <script src="/static/js/menu.js?v=2"></script>
     <script src="/static/js/info.js?v=2"></script>
     <script src="/static/js/confirm.js?v=1"></script>
 

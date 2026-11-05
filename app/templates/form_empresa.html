@@ -7,7 +7,7 @@
     <p class="subtitle">Atualize os dados da empresa e o conteúdo do Manual Geral.</p>
 </section>
 
-<form action="/empresa/editar" method="POST" enctype="multipart/form-data" class="form-manual empresa-form">
+<form action="/empresa/editar" method="POST" enctype="multipart/form-data" class="form-manual empresa-form" data-loading-form>
     <div class="form-group">
         <label for="empresa-label-cnpj">Nome do campo 1</label>
         <input id="empresa-label-cnpj" name="label_cnpj" type="text" value="{{ empresa.label_cnpj }}" required>
@@ -47,7 +47,7 @@
     </div>
     <div class="form-actions">
         <a href="/empresa" class="btn-cancel">Cancelar</a>
-        <button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar Informações</button>
+        <button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> <span data-submit-label>Salvar Informações</span></button>
     </div>
 </form>
 {% endblock %}
