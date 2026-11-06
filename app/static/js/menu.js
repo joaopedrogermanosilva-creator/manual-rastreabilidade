@@ -98,8 +98,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (filterFolder(child, query)) matchesChild = true;
         });
 
-        const isVisible = !query || matchesFolder || matchesChild;
-        item.hidden = !isVisible;
+        const isVisible = query.length === 0 || matchesFolder || matchesChild;
+        item.style.display = isVisible ? '' : 'none';
         return isVisible;
     }
 
