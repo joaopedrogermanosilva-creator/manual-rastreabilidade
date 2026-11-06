@@ -928,7 +928,7 @@ body {
     text-transform: uppercase;
 }
 .modal-empresa-field p { margin: 0; }
-.modal-empresa-field .empresa-cnpjs { flex-direction: row; flex-wrap: wrap; }
+.modal-empresa-field > .empresa-cnpjs { flex-direction: row; flex-wrap: wrap; }
 .modal-empresa-actions {
     display: flex;
     align-items: center;

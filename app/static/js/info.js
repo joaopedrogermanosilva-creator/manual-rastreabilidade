@@ -8,6 +8,10 @@
     const storageKey = "ocultar_fab";
     const isHome = window.location.pathname === "/";
 
+    function normalizar(texto) {
+        return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
     function updateVisibility() {
         const hiddenOnInternalPages = localStorage.getItem(storageKey) === "true" && !isHome;
         if (openButton instanceof HTMLButtonElement) {
@@ -70,12 +74,12 @@
     document.querySelectorAll(".ramais-search").forEach((searchInput) => {
         if (!(searchInput instanceof HTMLInputElement)) return;
         searchInput.addEventListener("input", () => {
-            const query = searchInput.value.trim().toLocaleLowerCase();
+            const query = normalizar(searchInput.value.trim());
             const list = searchInput.parentElement?.querySelector(".ramais-container");
             if (!list) return;
 
             list.querySelectorAll(".ramal-item").forEach((item) => {
-                item.style.display = item.textContent.trim().toLocaleLowerCase().includes(query)
+                item.style.display = normalizar(item.textContent.trim()).includes(query)
                     ? "flex"
                     : "none";
             });
