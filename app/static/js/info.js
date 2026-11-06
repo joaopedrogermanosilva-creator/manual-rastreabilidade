@@ -67,5 +67,20 @@
         });
     }
 
+    document.querySelectorAll(".ramais-search").forEach((searchInput) => {
+        if (!(searchInput instanceof HTMLInputElement)) return;
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.trim().toLocaleLowerCase();
+            const list = searchInput.parentElement?.querySelector(".ramais-container");
+            if (!list) return;
+
+            list.querySelectorAll(".ramal-item").forEach((item) => {
+                item.style.display = item.textContent.trim().toLocaleLowerCase().includes(query)
+                    ? "flex"
+                    : "none";
+            });
+        });
+    });
+
     updateVisibility();
 })();

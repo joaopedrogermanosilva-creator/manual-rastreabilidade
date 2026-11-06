@@ -569,6 +569,38 @@ body {
     border-radius: 6px;
     overflow-wrap: anywhere;
 }
+.ramais-listagem {
+    display: grid;
+    gap: 8px;
+}
+.ramais-container {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg);
+}
+.ramais-container::-webkit-scrollbar { width: 6px; }
+.ramais-container::-webkit-scrollbar-track { background: var(--bg); }
+.ramais-container::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 999px;
+}
+.ramais-search {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font: inherit;
+}
+.ramais-search:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
 .empresa-manual {
     min-height: 140px;
     padding: 20px;

@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=21">
+    <link rel="stylesheet" href="/static/css/style.css?v=22">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -135,11 +135,16 @@
                 <section class="modal-empresa-field">
                     <h3>{{ label_ramais }}</h3>
                     {% if empresa_ramais %}
-                    <ul class="empresa-cnpjs">
-                        {% for ramal in empresa_ramais %}
-                        <li class="perfil-badge">{{ ramal }}</li>
-                        {% endfor %}
-                    </ul>
+                    <div class="ramais-listagem">
+                        <input type="text" id="filtro-ramais-modal" class="ramais-search" placeholder="Pesquisar ramal..." autocomplete="off" aria-label="Pesquisar ramal">
+                        <div class="ramais-container">
+                            <ul class="empresa-cnpjs">
+                                {% for ramal in empresa_ramais %}
+                                <li class="perfil-badge ramal-item">{{ ramal }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
                     {% else %}
                     <p class="texto-livre">Não cadastrado</p>
                     {% endif %}
@@ -174,7 +179,7 @@
 
     <script src="/static/js/theme.js"></script>
     <script src="/static/js/menu.js?v=100"></script>
-    <script src="/static/js/info.js?v=2"></script>
+    <script src="/static/js/info.js?v=3"></script>
     <script src="/static/js/confirm.js?v=1"></script>
 
     

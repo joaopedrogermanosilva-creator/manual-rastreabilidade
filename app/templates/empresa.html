@@ -51,11 +51,16 @@
             <dt>{{ empresa.label_ramais }}</dt>
             <dd>
                 {% if empresa.ramais %}
-                <ul class="empresa-cnpjs">
-                    {% for ramal in empresa.ramais %}
-                    <li class="perfil-badge">{{ ramal }}</li>
-                    {% endfor %}
-                </ul>
+                <div class="ramais-listagem">
+                    <input type="text" id="filtro-ramais" class="ramais-search" placeholder="Pesquisar ramal..." autocomplete="off" aria-label="Pesquisar ramal">
+                    <div class="ramais-container">
+                        <ul class="empresa-cnpjs">
+                            {% for ramal in empresa.ramais %}
+                            <li class="perfil-badge ramal-item">{{ ramal }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
                 {% else %}
                 Não cadastrado
                 {% endif %}
