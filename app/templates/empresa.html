@@ -35,7 +35,7 @@
         </div>
         <div class="empresa-dado">
             <dt>{{ empresa.label_razao_social }}</dt>
-            <dd>{{ empresa.razao_social or "Não cadastrado" }}</dd>
+            <dd><span class="perfil-badge">{{ empresa.razao_social or "Não cadastrado" }}</span></dd>
         </div>
         <div class="empresa-dado">
             <dt>{{ empresa.label_endereco }}</dt>
@@ -46,10 +46,6 @@
                 Não cadastrado
                 {% endif %}
             </dd>
-        </div>
-        <div class="empresa-dado">
-            <dt>{{ empresa.label_telefone }}</dt>
-            <dd>{{ empresa.telefone or "Não cadastrado" }}</dd>
         </div>
         <div class="empresa-dado">
             <dt>{{ empresa.label_ramais }}</dt>

@@ -87,8 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function filterFolder(item, query) {
         const folderLink = item.querySelector(':scope > .sidebar-folder-link');
-        const matchesFolder = folderLink instanceof HTMLAnchorElement
-            && folderLink.textContent.toLocaleLowerCase().includes(query);
+        const folderName = folderLink instanceof HTMLAnchorElement
+            ? folderLink.textContent.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean)
+            : [];
+        const matchesFolder = query.length === 0 || query.every((word) => folderName.some((part) => part.includes(word)));
         const childItems = item.querySelectorAll(':scope > .sidebar-sublist > .sidebar-folder-item');
         let matchesChild = false;
 
@@ -103,14 +105,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function filterFolders() {
         if (!(folderFilter instanceof HTMLInputElement) || !(folderList instanceof HTMLUListElement)) return;
-        const query = folderFilter.value.trim().toLocaleLowerCase();
+        const query = folderFilter.value.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
         const rootFolders = folderList.querySelectorAll(':scope > .sidebar-folder-item');
         let visibleCount = 0;
         rootFolders.forEach((folder) => {
             if (filterFolder(folder, query)) visibleCount += 1;
         });
         if (folderEmpty instanceof HTMLElement) {
-            folderEmpty.hidden = !query || visibleCount > 0;
+            folderEmpty.hidden = query.length === 0 || visibleCount > 0;
         }
     }
 

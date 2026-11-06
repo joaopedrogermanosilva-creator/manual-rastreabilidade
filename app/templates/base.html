@@ -107,7 +107,7 @@
             <div class="modal-empresa-details">
                 <section class="modal-empresa-field">
                     <h3>{{ label_razao_social }}</h3>
-                    <p class="texto-livre">{{ empresa_razao_social or "Não cadastrado" }}</p>
+                    <span class="perfil-badge">{{ empresa_razao_social or "Não cadastrado" }}</span>
                 </section>
                 <section class="modal-empresa-field">
                     <h3>{{ label_cnpj }}</h3>
@@ -131,10 +131,6 @@
                     {% else %}
                     <p class="texto-livre">Não cadastrado</p>
                     {% endif %}
-                </section>
-                <section class="modal-empresa-field">
-                    <h3>{{ label_telefone }}</h3>
-                    <p class="texto-livre">{{ empresa_telefone or "Não cadastrado" }}</p>
                 </section>
                 <section class="modal-empresa-field">
                     <h3>{{ label_ramais }}</h3>
@@ -177,7 +173,7 @@
     </dialog>
 
     <script src="/static/js/theme.js"></script>
-    <script src="/static/js/menu.js?v=3"></script>
+    <script src="/static/js/menu.js?v=99"></script>
     <script src="/static/js/info.js?v=2"></script>
     <script src="/static/js/confirm.js?v=1"></script>
 
