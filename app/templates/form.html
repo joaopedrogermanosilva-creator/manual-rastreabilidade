@@ -22,9 +22,11 @@
                 <label>Instrução</label>
                 <textarea name="passos_texto" rows="4" placeholder="Descreva esta etapa"></textarea>
                 <input type="hidden" name="passos_fotos_existentes" value="">
+                <input type="hidden" name="remover_fotos" value="">
                 <label>Foto da etapa <small>(opcional)</small></label>
                 <input type="hidden" data-photo-order>
                 <input type="file" data-field="passos_fotos" accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp">
+                <button type="button" class="btn-remover-foto" hidden>🗑️ Remover Foto</button>
             </article>
         </div>
         <button type="button" id="adicionar-etapa" class="btn-add-etapa"><i class="ph ph-plus"></i> Adicionar Passo</button>
@@ -34,5 +36,5 @@
     <div class="form-actions"><a href="/" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> <span data-submit-label>Salvar</span></button></div>
 </form>
 <script src="/static/js/upload-validation.js"></script>
-<script src="/static/js/form_etapas.js?v=1"></script>
+<script src="/static/js/form_etapas.js?v=2"></script>
 {% endblock %}

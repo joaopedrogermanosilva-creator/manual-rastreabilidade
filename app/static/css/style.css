@@ -1411,7 +1411,8 @@ body {
     border-color: var(--accent);
 }
 .btn-add-etapa,
-.btn-remover-etapa {
+.btn-remover-etapa,
+.btn-remover-foto {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1427,6 +1428,18 @@ body {
 }
 .btn-add-etapa { align-self: flex-start; }
 .btn-remover-etapa { min-height: 34px; font-size: 13px; }
+.btn-remover-foto {
+    grid-column: 1 / -1;
+    justify-self: start;
+    min-height: 32px;
+    padding: 6px 10px;
+    color: #ef4444;
+    background: transparent;
+    border-color: #ef4444;
+    font-size: 13px;
+}
+.btn-remover-foto:hover { background: rgba(239, 68, 68, 0.12); }
+.btn-remover-foto[hidden] { display: none; }
 .etapa-num {
     display: grid;
     place-items: center;

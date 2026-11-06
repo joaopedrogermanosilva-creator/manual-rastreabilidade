@@ -726,6 +726,7 @@ def salvar_edicao(
     passos_fotos: list[UploadFile] | None = File(None),
     passos_fotos_ordem: Annotated[list[int] | None, Form()] = None,
     passos_fotos_existentes: Annotated[list[str] | None, Form()] = None,
+    remover_fotos: Annotated[list[str] | None, Form()] = None,
     categoria: Annotated[str | None, Form()] = None,
 ):
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
@@ -757,6 +758,7 @@ def salvar_edicao(
         passos_fotos_ordem,
         passos_fotos_existentes or [],
         {etapa.get("foto_url") for etapa in etapas_atuais if etapa.get("foto_url")},
+        remover_fotos or [],
     )
     texto_legado = como_realizar.strip()
     possui_etapas_form = bool(etapas)
@@ -869,6 +871,7 @@ def _preparar_etapas(
     fotos_ordem: list[int] | None,
     fotos_existentes: list[str],
     fotos_permitidas: set[str],
+    remover_fotos: list[str] | None = None,
 ) -> list[dict]:
     etapas = []
     indices_fotos = fotos_ordem if fotos_ordem is not None else list(range(len(fotos)))
@@ -881,12 +884,13 @@ def _preparar_etapas(
     for indice in range(total):
         texto = textos[indice].strip() if indice < len(textos) else ""
         foto = fotos_por_indice.get(indice)
+        remover_foto = indice < len(remover_fotos or []) and remover_fotos[indice] == "1"
         foto_url = None
         if foto and foto.filename:
             if not texto:
                 raise HTTPException(400, "Descreva a etapa antes de anexar uma foto.")
             foto_url = _salvar_foto_etapa(proc_id, foto)
-        elif indice < len(fotos_existentes):
+        elif not remover_foto and indice < len(fotos_existentes):
             url_enviada = fotos_existentes[indice].strip()
             if url_enviada in fotos_permitidas:
                 foto_url = url_enviada

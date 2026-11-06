@@ -24,6 +24,7 @@
                 <label>Instrução</label>
                 <textarea name="passos_texto" rows="4" placeholder="Descreva esta etapa">{{ etapa.texto }}</textarea>
                 <input type="hidden" name="passos_fotos_existentes" value="{{ etapa.foto_url or '' }}">
+                <input type="hidden" name="remover_fotos" value="">
                 {% if etapa.foto_url %}
                 <a class="etapa-foto-existente" href="{{ etapa.foto_url }}" target="_blank" rel="noopener noreferrer">
                     <img src="{{ etapa.foto_url }}" alt="Foto da etapa {{ loop.index }}" loading="lazy">
@@ -33,6 +34,7 @@
                 <label>Foto da etapa <small>(opcional)</small></label>
                 <input type="hidden" data-photo-order>
                 <input type="file" data-field="passos_fotos" accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp">
+                <button type="button" class="btn-remover-foto" {% if not etapa.foto_url %}hidden{% endif %}>🗑️ Remover Foto</button>
             </article>
             {% endfor %}
             {% else %}
@@ -46,9 +48,11 @@
                 <label>Instrução</label>
                 <textarea name="passos_texto" rows="4" placeholder="Descreva esta etapa">{{ texto_legado }}</textarea>
                 <input type="hidden" name="passos_fotos_existentes" value="">
+                <input type="hidden" name="remover_fotos" value="">
                 <label>Foto da etapa <small>(opcional)</small></label>
                 <input type="hidden" data-photo-order>
                 <input type="file" data-field="passos_fotos" accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp">
+                <button type="button" class="btn-remover-foto" hidden>🗑️ Remover Foto</button>
             </article>
             {% endif %}
             {% endif %}
@@ -94,5 +98,5 @@
 <form id="excluir-foto-legada" action="/tarefa/{{ proc.id }}/foto-legada/excluir" method="POST" data-confirmation data-confirm-message="Excluir a foto legada deste procedimento?"></form>
 {% endif %}
 <script src="/static/js/upload-validation.js"></script>
-<script src="/static/js/form_etapas.js?v=1"></script>
+<script src="/static/js/form_etapas.js?v=2"></script>
 {% endblock %}
