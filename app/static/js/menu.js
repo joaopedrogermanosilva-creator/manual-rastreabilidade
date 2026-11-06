@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (folderFilter instanceof HTMLInputElement) {
         folderFilter.addEventListener('input', filterFolders);
+        folderFilter.addEventListener('search', filterFolders);
     }
 
     function openMenu() {

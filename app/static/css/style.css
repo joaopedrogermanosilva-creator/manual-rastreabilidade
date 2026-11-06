@@ -558,12 +558,16 @@ body {
     padding: 0;
     list-style: none;
 }
-.empresa-cnpjs li {
+.perfil-badge {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
     padding: 5px 9px;
     color: var(--text);
     background: var(--accent-soft);
     border: 1px solid var(--border);
     border-radius: 6px;
+    overflow-wrap: anywhere;
 }
 .empresa-manual {
     min-height: 140px;

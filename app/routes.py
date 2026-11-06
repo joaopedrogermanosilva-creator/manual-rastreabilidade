@@ -119,10 +119,21 @@ def _texto_ajuda() -> str:
     return texto if texto is not None else TEXTO_AJUDA_PADRAO
 
 
+def _separar_valores_configuracao(valor: str | None) -> list[str]:
+    if not valor:
+        return []
+    return [
+        item.strip()
+        for item in re.split(r"[\n,]+", valor)
+        if item.strip()
+    ]
+
+
 def _ajuda_context(request: Request):
     empresa_cnpjs = get_configuracao("empresa_cnpjs")
     if empresa_cnpjs is None:
         empresa_cnpjs = get_configuracao("empresa_cnpj") or ""
+    empresa_ramais = get_configuracao("empresa_ramais") or ""
     return {
         "ajuda": {
             "titulo": TITULO_AJUDA,
@@ -139,6 +150,8 @@ def _ajuda_context(request: Request):
         "label_endereco": get_configuracao("label_endereco") or "Endereço",
         "empresa_telefone": get_configuracao("empresa_telefone"),
         "label_telefone": get_configuracao("label_telefone") or "Telefone",
+        "empresa_ramais": _separar_valores_configuracao(empresa_ramais),
+        "label_ramais": get_configuracao("label_ramais") or "Ramais",
     }
 
 
@@ -290,6 +303,8 @@ def empresa(request: Request):
         "razao_social": get_configuracao("empresa_razao_social"),
         "endereco": get_configuracao("empresa_endereco"),
         "telefone": get_configuracao("empresa_telefone"),
+        "ramais": _separar_valores_configuracao(get_configuracao("empresa_ramais")),
+        "label_ramais": get_configuracao("label_ramais") or "Ramais",
         "manual_geral": get_configuracao("empresa_manual_geral"),
         "manual_geral_url": get_configuracao("empresa_manual_geral_url"),
     }
@@ -322,6 +337,8 @@ def form_editar_empresa(request: Request):
         "razao_social": get_configuracao("empresa_razao_social") or "",
         "endereco": get_configuracao("empresa_endereco") or "",
         "telefone": get_configuracao("empresa_telefone") or "",
+        "ramais": get_configuracao("empresa_ramais") or "",
+        "label_ramais": get_configuracao("label_ramais") or "Ramais",
         "manual_geral": get_configuracao("empresa_manual_geral") or "",
         "manual_geral_url": get_configuracao("empresa_manual_geral_url") or "",
     }
@@ -346,6 +363,8 @@ def salvar_edicao_empresa(
     razao_social: Annotated[str, Form()] = "",
     endereco: Annotated[str, Form()] = "",
     telefone: Annotated[str, Form()] = "",
+    ramais: Annotated[str, Form()] = "",
+    label_ramais: Annotated[str, Form()] = "",
     manual_geral_pdf: UploadFile | None = File(None),
 ):
     manual_pdf_url = get_configuracao("empresa_manual_geral_url") or ""
@@ -396,6 +415,12 @@ def salvar_edicao_empresa(
         "empresa_razao_social": razao_social.strip(),
         "empresa_endereco": endereco.strip(),
         "empresa_telefone": telefone.strip(),
+        "empresa_ramais": "\n".join(
+            ramal.strip()
+            for ramal in re.split(r"[\n,]+", ramais)
+            if ramal.strip()
+        ),
+        "label_ramais": label_ramais.strip() or "Ramais",
         "empresa_manual_geral_url": manual_pdf_url,
     }
     for chave, valor in configuracoes.items():

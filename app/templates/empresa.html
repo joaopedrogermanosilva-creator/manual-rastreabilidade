@@ -25,7 +25,7 @@
                 {% if empresa.cnpjs %}
                 <ul class="empresa-cnpjs">
                     {% for cnpj in empresa.cnpjs %}
-                    <li>{{ cnpj }}</li>
+                    <li class="perfil-badge">{{ cnpj }}</li>
                     {% endfor %}
                 </ul>
                 {% else %}
@@ -39,11 +39,31 @@
         </div>
         <div class="empresa-dado">
             <dt>{{ empresa.label_endereco }}</dt>
-            <dd>{{ empresa.endereco or "Não cadastrado" }}</dd>
+            <dd>
+                {% if empresa.endereco %}
+                <span class="perfil-badge">{{ empresa.endereco }}</span>
+                {% else %}
+                Não cadastrado
+                {% endif %}
+            </dd>
         </div>
         <div class="empresa-dado">
             <dt>{{ empresa.label_telefone }}</dt>
             <dd>{{ empresa.telefone or "Não cadastrado" }}</dd>
+        </div>
+        <div class="empresa-dado">
+            <dt>{{ empresa.label_ramais }}</dt>
+            <dd>
+                {% if empresa.ramais %}
+                <ul class="empresa-cnpjs">
+                    {% for ramal in empresa.ramais %}
+                    <li class="perfil-badge">{{ ramal }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                Não cadastrado
+                {% endif %}
+            </dd>
         </div>
     </dl>
 </section>

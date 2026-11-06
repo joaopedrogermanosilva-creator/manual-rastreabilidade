@@ -33,6 +33,13 @@
         <label for="empresa-telefone">Valor</label>
         <input id="empresa-telefone" name="telefone" type="tel" value="{{ empresa.telefone }}" autocomplete="tel">
     </div>
+    <div class="form-group">
+        <label for="empresa-label-ramais">Rótulo dos ramais</label>
+        <input id="empresa-label-ramais" name="label_ramais" type="text" value="{{ empresa.label_ramais }}" required>
+        <label for="empresa-ramais">Ramais</label>
+        <textarea id="empresa-ramais" name="ramais" rows="3" placeholder="Um ramal por linha">{{ empresa.ramais }}</textarea>
+        <small>Você pode informar vários ramais, separados por linha ou vírgula.</small>
+    </div>
     <div class="form-group empresa-manual-field">
         <label for="label-manual-geral">Título do Manual Geral</label>
         <input id="label-manual-geral" name="label_manual_geral" type="text" value="{{ empresa.label_manual_geral }}" required>

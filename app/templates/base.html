@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#f97316">
     <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 
-    <link rel="stylesheet" href="/static/css/style.css?v=20">
+    <link rel="stylesheet" href="/static/css/style.css?v=21">
     <script>
         (function () {
             const t = localStorage.getItem('theme') || 'dark';
@@ -97,7 +97,6 @@
         <div class="modal-empresa-content">
             <header class="modal-empresa-header">
                 <div>
-                    <span class="empresa-modal-eyebrow">Perfil da Empresa</span>
                     <h2 id="modal-empresa-titulo">Perfil da Empresa</h2>
                 </div>
                 <button type="button" class="info-dialog-close" data-empresa-close aria-label="Fechar perfil da empresa" title="Fechar">
@@ -117,7 +116,7 @@
                     <ul class="empresa-cnpjs">
                         {% for cnpj in cnpjs_modal %}
                         {% if cnpj | trim %}
-                        <li>{{ cnpj | trim }}</li>
+                        <li class="perfil-badge">{{ cnpj | trim }}</li>
                         {% endif %}
                         {% endfor %}
                     </ul>
@@ -127,11 +126,27 @@
                 </section>
                 <section class="modal-empresa-field">
                     <h3>{{ label_endereco }}</h3>
-                    <p class="texto-livre">{{ empresa_endereco or "Não cadastrado" }}</p>
+                    {% if empresa_endereco and empresa_endereco | trim %}
+                    <span class="perfil-badge">{{ empresa_endereco }}</span>
+                    {% else %}
+                    <p class="texto-livre">Não cadastrado</p>
+                    {% endif %}
                 </section>
                 <section class="modal-empresa-field">
                     <h3>{{ label_telefone }}</h3>
                     <p class="texto-livre">{{ empresa_telefone or "Não cadastrado" }}</p>
+                </section>
+                <section class="modal-empresa-field">
+                    <h3>{{ label_ramais }}</h3>
+                    {% if empresa_ramais %}
+                    <ul class="empresa-cnpjs">
+                        {% for ramal in empresa_ramais %}
+                        <li class="perfil-badge">{{ ramal }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="texto-livre">Não cadastrado</p>
+                    {% endif %}
                 </section>
             </div>
 
@@ -162,7 +177,7 @@
     </dialog>
 
     <script src="/static/js/theme.js"></script>
-    <script src="/static/js/menu.js?v=2"></script>
+    <script src="/static/js/menu.js?v=3"></script>
     <script src="/static/js/info.js?v=2"></script>
     <script src="/static/js/confirm.js?v=1"></script>
 
