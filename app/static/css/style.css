@@ -1360,6 +1360,104 @@ body {
     margin-right: 8px;
     color: var(--accent);
 }
+.etapas-ajuda {
+    margin: -4px 0 2px;
+    color: var(--text-dim);
+    font-size: 13px;
+}
+.etapas-form,
+.etapas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.etapa-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+    padding: 18px;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+}
+.etapa-card-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--accent);
+}
+.etapa-form-card > label,
+.etapa-form-card > textarea,
+.etapa-form-card > input[type="file"],
+.etapa-foto-existente,
+.etapa-foto-atual {
+    grid-column: 1 / -1;
+}
+.etapa-form-card > textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    color: var(--text);
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+}
+.etapa-form-card > textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+.btn-add-etapa,
+.btn-remover-etapa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 8px 12px;
+    color: var(--text);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 7px;
+    font: inherit;
+    cursor: pointer;
+}
+.btn-add-etapa { align-self: flex-start; }
+.btn-remover-etapa { min-height: 34px; font-size: 13px; }
+.etapa-num {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    color: #fff;
+    background: var(--accent);
+    border-radius: 50%;
+    font-weight: 700;
+}
+.etapa-conteudo {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.etapa-conteudo .texto-livre { margin: 0; }
+.etapa-foto,
+.etapa-foto-atual img,
+.etapa-foto-existente img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 520px;
+    margin-top: 12px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+.etapa-foto-existente,
+.etapa-foto-atual {
+    color: var(--text-dim);
+    font-size: 13px;
+}
 .passos-grid {
     display: flex;
     flex-direction: column;
@@ -1502,6 +1600,7 @@ body {
     .editar-anexo-item { align-items: flex-start; gap: 8px; }
     .btn-excluir-anexo { padding: 7px; }
     .anexo-file-icon { font-size: 40px; }
+    .etapa-card { gap: 10px; padding: 14px; }
 }
 .empty-state {
     text-align: center;

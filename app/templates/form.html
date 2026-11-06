@@ -10,10 +10,29 @@
     <div class="form-group"><label>Pasta <small>(opcional)</small></label><select name="pasta_id"><option value="__none__">Sem pasta (raiz)</option>{% for pasta in pastas %}<option value="{{ pasta.id }}" {% if pasta_id_selecionada|string == pasta.id|string %}selected{% endif %}>{{ pasta.caminho }}</option>{% endfor %}</select></div>
     <div class="form-group"><label>Resumo Curto</label><input type="text" name="resumo" required></div>
     <div class="form-group"><label>Objetivo</label><textarea name="objetivo" rows="3" required></textarea></div>
-    <div class="form-group"><label>Como realizar (escreva livremente, use Enter para parágrafos ou tópicos)</label><textarea name="como_realizar" rows="5" required></textarea></div>
+    <div class="form-group">
+        <label>Como realizar</label>
+        <p class="etapas-ajuda">Organize o procedimento em etapas. Cada etapa pode incluir uma foto.</p>
+        <div id="etapas-container" class="etapas-form">
+            <article class="etapa-card etapa-form-card">
+                <header class="etapa-card-header">
+                    <strong>Etapa 1</strong>
+                    <button type="button" class="btn-remover-etapa" aria-label="Remover etapa"><i class="ph ph-trash"></i> Remover</button>
+                </header>
+                <label>Instrução</label>
+                <textarea name="passos_texto" rows="4" placeholder="Descreva esta etapa"></textarea>
+                <input type="hidden" name="passos_fotos_existentes" value="">
+                <label>Foto da etapa <small>(opcional)</small></label>
+                <input type="hidden" data-photo-order>
+                <input type="file" data-field="passos_fotos" accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp">
+            </article>
+        </div>
+        <button type="button" id="adicionar-etapa" class="btn-add-etapa"><i class="ph ph-plus"></i> Adicionar Passo</button>
+    </div>
     <div class="form-group"><label>Pontos de atenção (escreva livremente, use Enter para parágrafos ou tópicos)</label><textarea name="pontos_atencao" rows="3"></textarea></div>
     <div class="form-group"><label>Anexar Arquivos (Fotos, Vídeos, PDFs, Documentos)</label><input type="file" name="arquivos" multiple accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx,video/*"></div>
     <div class="form-actions"><a href="/" class="btn-cancel">Cancelar</a><button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> <span data-submit-label>Salvar</span></button></div>
 </form>
 <script src="/static/js/upload-validation.js"></script>
+<script src="/static/js/form_etapas.js?v=1"></script>
 {% endblock %}

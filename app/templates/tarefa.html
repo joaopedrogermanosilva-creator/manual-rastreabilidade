@@ -28,7 +28,25 @@
 
 <section class="bloco">
     <h2 class="section-title"><i class="ph ph-list-checks"></i> 2. Como realizar</h2>
+    {% if etapas %}
+    <div class="etapas-lista">
+        {% for etapa in etapas %}
+        <article class="etapa-card">
+            <div class="etapa-num">{{ loop.index }}</div>
+            <div class="etapa-conteudo">
+                <div class="texto-livre">{{ etapa.texto }}</div>
+                {% if etapa.foto_url %}
+                <a href="{{ etapa.foto_url }}" target="_blank" rel="noopener noreferrer">
+                    <img class="etapa-foto" src="{{ etapa.foto_url }}" alt="Foto da etapa {{ loop.index }}" loading="lazy">
+                </a>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
     <div class="texto-livre">{{ proc.como_realizar | join('\n') if proc.como_realizar is iterable and proc.como_realizar is not string else proc.como_realizar }}</div>
+    {% endif %}
 </section>
 
 <section class="bloco">

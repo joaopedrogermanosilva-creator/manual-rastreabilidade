@@ -14,6 +14,7 @@ from uuid import uuid4
 from supabase_client import supabase
 from storage3.utils import StorageException
 from app.dados_config import get_configuracao, salvar_configuracao
+from app.dados_etapas import adicionar_etapas, buscar_etapas, excluir_etapas
 from app.dados import (
     adicionar_anexo,
     adicionar_procedimento,
@@ -607,11 +608,15 @@ def salvar_novo(
     titulo: Annotated[str, Form()],
     resumo: Annotated[str, Form()],
     objetivo: Annotated[str, Form()],
-    como_realizar: Annotated[str, Form()],
+    como_realizar: Annotated[str, Form()] = "",
     pontos_atencao: Annotated[str, Form()] = "",
     pasta_id: Annotated[str | None, Form()] = None,
     arquivo: UploadFile | None = File(None),
     arquivos: list[UploadFile] | None = File(None),
+    passos_texto: Annotated[list[str] | None, Form()] = None,
+    passos_fotos: list[UploadFile] | None = File(None),
+    passos_fotos_ordem: Annotated[list[int] | None, Form()] = None,
+    passos_fotos_existentes: Annotated[list[str] | None, Form()] = None,
     categoria: Annotated[str, Form()] = "operacoes",
 ):
     print(
@@ -621,9 +626,14 @@ def salvar_novo(
     pasta_id_validado = _validar_pasta_id(pasta_id)
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
     arquivos_validados = _validar_anexos(arquivos_preenchidos)
-    texto_passos = como_realizar.strip()
+    texto_legado = como_realizar.strip()
     texto_pontos = pontos_atencao.strip()
-    passos = [texto_passos] if texto_passos else []
+    textos_etapas = passos_texto or []
+    _validar_etapas_form(passos_texto, passos_fotos or [], passos_fotos_ordem)
+    possui_etapas_form = any(texto.strip() for texto in textos_etapas) or any(
+        foto.filename for foto in (passos_fotos or [])
+    )
+    passos_legados = [texto_legado] if texto_legado and not possui_etapas_form else []
     pontos = [texto_pontos] if texto_pontos else []
     url = None
     if arquivo and arquivo.filename:
@@ -636,7 +646,7 @@ def salvar_novo(
             raise HTTPException(
                 502, "Não foi possível enviar o arquivo do procedimento."
             ) from exc
-    procedimento = adicionar_procedimento({"categoria": categoria, "titulo": titulo, "resumo": resumo, "objetivo": objetivo, "como_realizar": passos, "pontos_atencao": pontos, "arquivo_url": url, "pasta_id": pasta_id_validado})
+    procedimento = adicionar_procedimento({"categoria": categoria, "titulo": titulo, "resumo": resumo, "objetivo": objetivo, "como_realizar": passos_legados, "pontos_atencao": pontos, "arquivo_url": url, "pasta_id": pasta_id_validado})
     if not procedimento or procedimento.get("id") is None:
         raise HTTPException(
             500, "Não foi possível confirmar a criação do procedimento."
@@ -654,6 +664,15 @@ def salvar_novo(
             raise HTTPException(
                 502, "O procedimento foi salvo, mas houve uma falha ao enviar os anexos."
             ) from exc
+    etapas = _preparar_etapas(
+        procedimento["id"],
+        textos_etapas,
+        passos_fotos or [],
+        passos_fotos_ordem,
+        passos_fotos_existentes or [],
+        set(),
+    )
+    _persistir_etapas(procedimento["id"], etapas)
     if pasta_id_validado:
         return RedirectResponse(f"/pasta/{pasta_id_validado}", 303)
     return RedirectResponse("/", 303)
@@ -666,6 +685,7 @@ def salvar_novo(
 def form_editar(proc_id: int, request: Request):
     proc = buscar_procedimento(proc_id)
     if not proc: raise HTTPException(404)
+    etapas = buscar_etapas(proc_id)
     anexos = get_anexos_procedimento(proc_id)
     if proc.get("arquivo_url") and not any(item.get("arquivo_url") == proc["arquivo_url"] for item in anexos):
         legacy_name = unquote(urlsplit(proc["arquivo_url"]).path.rsplit("/", 1)[-1]) or "Arquivo existente"
@@ -682,6 +702,7 @@ def form_editar(proc_id: int, request: Request):
         name="form_editar.html",
         context={
             "proc": proc,
+            "etapas": etapas,
             "pastas": listar_opcoes_pasta(),
             "anexos": anexos,
         },
@@ -696,22 +717,27 @@ def salvar_edicao(
     titulo: Annotated[str, Form()],
     resumo: Annotated[str, Form()],
     objetivo: Annotated[str, Form()],
-    como_realizar: Annotated[str, Form()],
+    como_realizar: Annotated[str, Form()] = "",
     pontos_atencao: Annotated[str, Form()] = "",
     pasta_id: Annotated[str | None, Form()] = None,
     arquivo: UploadFile | None = File(None),
     arquivos: list[UploadFile] | None = File(None),
+    passos_texto: Annotated[list[str] | None, Form()] = None,
+    passos_fotos: list[UploadFile] | None = File(None),
+    passos_fotos_ordem: Annotated[list[int] | None, Form()] = None,
+    passos_fotos_existentes: Annotated[list[str] | None, Form()] = None,
     categoria: Annotated[str | None, Form()] = None,
 ):
     arquivos_preenchidos = [item for item in (arquivos or []) if item.filename]
     arquivos_validados = _validar_anexos(arquivos_preenchidos)
-    texto_passos = como_realizar.strip()
     texto_pontos = pontos_atencao.strip()
-    passos = [texto_passos] if texto_passos else []
     pontos = [texto_pontos] if texto_pontos else []
     proc_atual = buscar_procedimento(proc_id)
     if not proc_atual:
         raise HTTPException(404)
+    etapas_atuais = buscar_etapas(proc_id)
+    textos_etapas = passos_texto or []
+    _validar_etapas_form(passos_texto, passos_fotos or [], passos_fotos_ordem)
     pasta_id_validado = (
         _validar_pasta_id(pasta_id)
         if pasta_id is not None
@@ -724,9 +750,21 @@ def salvar_edicao(
             supabase.storage.from_("documentos").upload(path, arquivo.file.read(), {"upsert": "true"})
             url = supabase.storage.from_("documentos").get_public_url(path)
         except Exception as e: print(f"Erro Upload: {e}")
-    atualizar_procedimento(proc_id, {"categoria": categoria or proc_atual.get("categoria_slug") or "operacoes", "titulo": titulo, "resumo": resumo, "objetivo": objetivo, "como_realizar": passos, "pontos_atencao": pontos, "arquivo_url": url, "pasta_id": pasta_id_validado})
+    etapas = _preparar_etapas(
+        proc_id,
+        textos_etapas,
+        passos_fotos or [],
+        passos_fotos_ordem,
+        passos_fotos_existentes or [],
+        {etapa.get("foto_url") for etapa in etapas_atuais if etapa.get("foto_url")},
+    )
+    texto_legado = como_realizar.strip()
+    possui_etapas_form = bool(etapas)
+    passos_legados = [texto_legado] if texto_legado and not possui_etapas_form else []
+    atualizar_procedimento(proc_id, {"categoria": categoria or proc_atual.get("categoria_slug") or "operacoes", "titulo": titulo, "resumo": resumo, "objetivo": objetivo, "como_realizar": passos_legados, "pontos_atencao": pontos, "arquivo_url": url, "pasta_id": pasta_id_validado})
     if arquivos_validados:
         _salvar_anexos(proc_id, arquivos_validados)
+    _persistir_etapas(proc_id, etapas, substituir=True)
     return RedirectResponse(
         url=f"/tarefa/{proc_id}?sucesso=1",
         status_code=303,
@@ -797,6 +835,7 @@ def tarefa(proc_id: int, request: Request):
     if not proc: raise HTTPException(404)
     cats = get_categorias()
     anexos = get_anexos_procedimento(proc_id)
+    etapas = buscar_etapas(proc_id)
     pasta_atual = buscar_pasta(proc["pasta_id"]) if proc.get("pasta_id") else None
     urls_anexos = {item.get("arquivo_url") for item in anexos}
     if proc.get("arquivo_url") and proc["arquivo_url"] not in urls_anexos:
@@ -818,9 +857,126 @@ def tarefa(proc_id: int, request: Request):
             "url_voltar": f"/pasta/{pasta_atual['id']}" if pasta_atual else "/",
             "categorias": cats,
             "anexos": anexos,
+            "etapas": etapas,
             "sucesso": request.query_params.get("sucesso") == "1",
         },
     )
+
+def _preparar_etapas(
+    proc_id: int,
+    textos: list[str],
+    fotos: list[UploadFile],
+    fotos_ordem: list[int] | None,
+    fotos_existentes: list[str],
+    fotos_permitidas: set[str],
+) -> list[dict]:
+    etapas = []
+    indices_fotos = fotos_ordem if fotos_ordem is not None else list(range(len(fotos)))
+    fotos_por_indice = dict(zip(indices_fotos, fotos))
+    total = max(
+        len(textos),
+        len(fotos_existentes),
+        max(indices_fotos, default=-1) + 1,
+    )
+    for indice in range(total):
+        texto = textos[indice].strip() if indice < len(textos) else ""
+        foto = fotos_por_indice.get(indice)
+        foto_url = None
+        if foto and foto.filename:
+            if not texto:
+                raise HTTPException(400, "Descreva a etapa antes de anexar uma foto.")
+            foto_url = _salvar_foto_etapa(proc_id, foto)
+        elif indice < len(fotos_existentes):
+            url_enviada = fotos_existentes[indice].strip()
+            if url_enviada in fotos_permitidas:
+                foto_url = url_enviada
+
+        if texto or foto_url:
+            etapas.append({
+                "ordem": len(etapas) + 1,
+                "texto": texto,
+                "foto_url": foto_url,
+            })
+    return etapas
+
+
+def _validar_etapas_form(
+    textos: list[str] | None,
+    fotos: list[UploadFile],
+    fotos_ordem: list[int] | None,
+):
+    if textos is not None and not any(texto.strip() for texto in textos):
+        raise HTTPException(400, "Adicione o texto de pelo menos uma etapa.")
+    indices_fotos = fotos_ordem if fotos_ordem is not None else list(range(len(fotos)))
+    if len(indices_fotos) != len(fotos):
+        raise HTTPException(400, "Não foi possível associar as fotos às etapas.")
+    if len(set(indices_fotos)) != len(indices_fotos):
+        raise HTTPException(400, "Uma etapa não pode receber mais de uma foto.")
+    for foto, indice in zip(fotos, indices_fotos):
+        if indice < 0 or indice >= len(textos or []):
+            raise HTTPException(400, "A ordem das fotos das etapas é inválida.")
+        if foto.filename and (indice >= len(textos or []) or not textos[indice].strip()):
+            raise HTTPException(400, "Descreva a etapa antes de anexar uma foto.")
+        if foto.filename:
+            _validar_foto_etapa(foto)
+
+
+def _validar_foto_etapa(foto: UploadFile) -> tuple[str, str]:
+    nome = (foto.filename or "").replace("\\", "/").rsplit("/", 1)[-1]
+    extensao = "." + nome.rsplit(".", 1)[-1].lower() if "." in nome else ""
+    tipos_imagem = {
+        ".jpg": ("image/jpeg", lambda data: data.startswith(b"\xff\xd8\xff")),
+        ".jpeg": ("image/jpeg", lambda data: data.startswith(b"\xff\xd8\xff")),
+        ".png": ("image/png", lambda data: data.startswith(b"\x89PNG\r\n\x1a\n")),
+        ".gif": ("image/gif", lambda data: data.startswith((b"GIF87a", b"GIF89a"))),
+        ".webp": (
+            "image/webp",
+            lambda data: len(data) >= 12 and data.startswith(b"RIFF") and data[8:12] == b"WEBP",
+        ),
+    }
+    tipo_esperado = tipos_imagem.get(extensao)
+    if not tipo_esperado:
+        raise HTTPException(400, "As fotos das etapas devem estar em JPG, PNG, GIF ou WebP.")
+    tipo, validar_conteudo = tipo_esperado
+    if foto.content_type and foto.content_type.lower() not in {tipo, "application/octet-stream"}:
+        raise HTTPException(400, "O formato informado para a foto da etapa não é válido.")
+
+    conteudo = foto.file.read(20 * 1024 * 1024 + 1)
+    if len(conteudo) > 20 * 1024 * 1024:
+        raise HTTPException(413, "Cada foto de etapa deve ter no máximo 20 MB.")
+    if not validar_conteudo(conteudo):
+        raise HTTPException(400, "O arquivo enviado não parece ser uma imagem válida.")
+    foto.file.seek(0)
+    return extensao, tipo
+
+
+def _salvar_foto_etapa(proc_id: int, foto: UploadFile) -> str:
+    extensao, tipo = _validar_foto_etapa(foto)
+    conteudo = foto.file.read(20 * 1024 * 1024 + 1)
+    caminho = f"procedimentos/{proc_id}/etapas/{uuid4().hex}{extensao}"
+    try:
+        bucket = supabase.storage.from_("documentos")
+        bucket.upload(caminho, conteudo, {"content-type": tipo})
+        return bucket.get_public_url(caminho)
+    except Exception as exc:
+        logger.exception("Falha ao enviar foto da etapa do procedimento %s.", proc_id)
+        raise HTTPException(502, "Não foi possível enviar a foto da etapa.") from exc
+
+
+def _persistir_etapas(proc_id: int, etapas: list[dict], substituir: bool = False):
+    try:
+        if substituir:
+            excluir_etapas(proc_id)
+        if etapas:
+            inseridas = adicionar_etapas(proc_id, etapas)
+            if len(inseridas) != len(etapas):
+                raise RuntimeError("A quantidade de etapas confirmadas não corresponde ao envio.")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Falha ao salvar etapas do procedimento %s.", proc_id)
+        raise HTTPException(502, "Não foi possível salvar as etapas do procedimento.") from exc
+
 
 def _validar_anexos(arquivos: list[UploadFile]) -> list[tuple[UploadFile, str, str]]:
     arquivos_validados = []

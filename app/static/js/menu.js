@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.addEventListener('submit', (event) => {
         if (!(event.target instanceof HTMLFormElement)) return;
+        if (event.defaultPrevented) return;
         if (
             event.target.matches('[data-confirmation]')
             && event.target.dataset.confirmed !== 'true'
