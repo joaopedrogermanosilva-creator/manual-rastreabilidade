@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeMenu = document.getElementById('close-menu');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
+    const folderFilter = document.getElementById('sidebar-folder-filter');
+    const folderList = document.getElementById('sidebar-folders');
+    const folderEmpty = document.getElementById('sidebar-folder-empty');
     const progressBar = document.getElementById('progress-bar');
     let progressTimer;
     let progressResetTimer;
@@ -81,6 +84,39 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     window.addEventListener('pageshow', completeProgress);
+
+    function filterFolder(item, query) {
+        const folderLink = item.querySelector(':scope > .sidebar-folder-link');
+        const matchesFolder = folderLink instanceof HTMLAnchorElement
+            && folderLink.textContent.toLocaleLowerCase().includes(query);
+        const childItems = item.querySelectorAll(':scope > .sidebar-sublist > .sidebar-folder-item');
+        let matchesChild = false;
+
+        childItems.forEach((child) => {
+            if (filterFolder(child, query)) matchesChild = true;
+        });
+
+        const isVisible = !query || matchesFolder || matchesChild;
+        item.hidden = !isVisible;
+        return isVisible;
+    }
+
+    function filterFolders() {
+        if (!(folderFilter instanceof HTMLInputElement) || !(folderList instanceof HTMLUListElement)) return;
+        const query = folderFilter.value.trim().toLocaleLowerCase();
+        const rootFolders = folderList.querySelectorAll(':scope > .sidebar-folder-item');
+        let visibleCount = 0;
+        rootFolders.forEach((folder) => {
+            if (filterFolder(folder, query)) visibleCount += 1;
+        });
+        if (folderEmpty instanceof HTMLElement) {
+            folderEmpty.hidden = !query || visibleCount > 0;
+        }
+    }
+
+    if (folderFilter instanceof HTMLInputElement) {
+        folderFilter.addEventListener('input', filterFolders);
+    }
 
     function openMenu() {
         if (!sidebar || !overlay) return;

@@ -99,8 +99,11 @@ def excluir_procedimento(proc_id):
     supabase.table("procedimentos").delete().eq("id", proc_id).execute()
 
 def buscar_procedimentos(termo):
-    if not termo: return []
-    response = supabase.table("procedimentos").select("*").or_(
-        f"titulo.ilike.%{termo}%,resumo.ilike.%{termo}%,objetivo.ilike.%{termo}%"
+    termo = termo.strip() if termo else ""
+    if not termo:
+        return []
+    response = supabase.rpc(
+        "buscar_procedimentos_fuzzy",
+        {"termo": termo},
     ).execute()
     return response.data
